@@ -1,5 +1,14 @@
 # molly
 
+Molly Spring Boot 4.0 Project
+
+## 技术栈
+
+- Java 17
+- Spring Boot 4.0.7
+- Spring Security
+- MyBatis Spring Boot Starter 4.0.1
+- MySQL
 基于 Spring Boot 4.0 的后端服务示例项目，集成 Spring Web、Spring Security、MyBatis 与 MySQL。
 
 ## 项目信息
