@@ -9,7 +9,7 @@ Molly Spring Boot 4.0 Project
 - Spring Security
 - MyBatis Spring Boot Starter 4.0.1
 - MySQL
-基于 Spring Boot 4.0 的后端服务示例项目，集成 Spring Web、Spring Security、MyBatis 与 MySQL。
+基于 Spring Boot 4.0 的后端服务示例项目，集成 Spring Web、Spring Security、MyBatis 与 MySQL（数据库使用 TiDB Cloud 托管的 MySQL 兼容实例）。
 
 ## 项目信息
 
@@ -20,7 +20,7 @@ Molly Spring Boot 4.0 Project
 | 构建工具 | Maven |
 | Spring Boot | 4.0.0 |
 | Java | 21 |
-| 数据库 | MySQL |
+| 数据库 | TiDB Cloud（MySQL 兼容） |
 
 ## 技术栈
 
@@ -34,7 +34,7 @@ Molly Spring Boot 4.0 Project
 
 - JDK 21 及以上
 - Maven 3.9 及以上
-- MySQL 8.0 及以上（可按需调整驱动版本）
+- TiDB Cloud 账号（项目已使用位于 `ap-southeast-1` 区域的 TiDB Cloud 集群，地址：`gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`）
 
 建议使用以下开发工具：
 
@@ -50,24 +50,25 @@ git clone https://github.com/GeBron/molly.git
 cd molly
 ```
 
-### 2. 初始化数据库
+### 2. 配置 TiDB Cloud 凭据
 
-在 MySQL 中创建数据库（默认数据库名：`molly`）：
+项目数据源指向 TiDB Cloud 托管的 MySQL 兼容实例，无需本地安装 MySQL。连接信息以环境变量方式注入，启动前需在系统中设置：
 
-```sql
-CREATE DATABASE molly DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```bash
+export TiDB_USERNAME=<your_tidb_username>
+export TiDB_PASSWORD=<your_tidb_password>
 ```
 
-> 如果不需要立即连接数据库，可暂时跳过此步骤，启动前在 `application.properties` 中配置相关参数。
+> 请在 TiDB Cloud 控制台创建集群与数据库 `molly`，并确保当前网络可访问 `gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`（TiDB Cloud 默认要求 TLS 加密连接）。
 
 ### 3. 配置数据源
 
-编辑 `src/main/resources/application.properties`，追加以下内容（请按本地环境修改）：
+`src/main/resources/application.properties` 中已使用上述环境变量配置数据源，无需手动修改：
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/molly?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-spring.datasource.username=root
-spring.datasource.password=your_password
+spring.datasource.url=jdbc:mysql://${TiDB_USERNAME}:${TiDB_PASSWORD}@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/molly?sslMode=VERIFY_IDENTITY
+spring.datasource.username=${TiDB_USERNAME}
+spring.datasource.password=${TiDB_PASSWORD}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
