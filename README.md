@@ -2,15 +2,6 @@
 
 Molly Spring Boot 4.0 Project
 
-## 技术栈
-
-- Java 17
-- Spring Boot 4.0.7
-- Spring Security
-- MyBatis Spring Boot Starter 4.0.1
-- MySQL
-基于 Spring Boot 4.0 的后端服务示例项目，集成 Spring Web、Spring Security、MyBatis 与 MySQL（数据库使用 TiDB Cloud 托管的 MySQL 兼容实例）。
-
 ## 项目信息
 
 | 项目 | 说明 |
@@ -18,21 +9,24 @@ Molly Spring Boot 4.0 Project
 | 项目名 | molly |
 | 包名 | `com.demo.molly` |
 | 构建工具 | Maven |
-| Spring Boot | 4.0.0 |
-| Java | 21 |
+| Spring Boot | 4.0.7 |
+| Java | 17 |
 | 数据库 | TiDB Cloud（MySQL 兼容） |
 
 ## 技术栈
 
-- Spring Boot 4.0.0
+- Java 17
+- Spring Boot 4.0.7
 - Spring Web
 - Spring Security
-- MyBatis（mybatis-spring-boot-starter）
+- MyBatis Spring Boot Starter 4.0.1
 - MySQL Connector/J
+
+基于 Spring Boot 4.0 的后端服务示例项目，集成 Spring Web、Spring Security、MyBatis 与 MySQL（数据库使用 TiDB Cloud 托管的 MySQL 兼容实例）。
 
 ## 环境要求
 
-- JDK 21 及以上
+- JDK 17 及以上
 - Maven 3.9 及以上
 - TiDB Cloud 账号（项目已使用位于 `ap-southeast-1` 区域的 TiDB Cloud 集群，地址：`gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`）
 
@@ -52,18 +46,16 @@ cd molly
 
 ### 2. 配置 TiDB Cloud 凭据
 
-项目数据源指向 TiDB Cloud 托管的 MySQL 兼容实例，无需本地安装 MySQL。连接信息以环境变量方式注入，启动前需在系统中设置：
+项目数据源指向 TiDB Cloud 托管的 MySQL 兼容实例，无需本地安装 MySQL。连接信息以环境变量方式注入，`src/main/resources/application.properties` 中已引用这些变量，无需手动修改配置文件。
+
+启动前在系统中设置环境变量：
 
 ```bash
 export TiDB_USERNAME=<your_tidb_username>
 export TiDB_PASSWORD=<your_tidb_password>
 ```
 
-> 请在 TiDB Cloud 控制台创建集群与数据库 `molly`，并确保当前网络可访问 `gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`（TiDB Cloud 默认要求 TLS 加密连接）。
-
-### 3. 配置数据源
-
-`src/main/resources/application.properties` 中已使用上述环境变量配置数据源，无需手动修改：
+对应的数据源配置如下：
 
 ```properties
 spring.datasource.url=jdbc:mysql://${TiDB_USERNAME}:${TiDB_PASSWORD}@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/molly?sslMode=VERIFY_IDENTITY
@@ -72,20 +64,14 @@ spring.datasource.password=${TiDB_PASSWORD}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
-### 4. 构建并运行
+> 请在 TiDB Cloud 控制台创建集群与数据库 `molly`，并确保当前网络可访问 `gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`（TiDB Cloud 默认要求 TLS 加密连接）。
+
+### 3. 运行项目
 
 使用 Maven 直接运行：
 
 ```bash
-cd molly
 mvn spring-boot:run
-```
-
-或者先打包再运行：
-
-```bash
-mvn clean package -DskipTests
-java -jar target/molly-0.0.1-SNAPSHOT.jar
 ```
 
 应用启动后默认监听 `8080` 端口。
