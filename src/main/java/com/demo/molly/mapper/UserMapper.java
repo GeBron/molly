@@ -1,0 +1,46 @@
+package com.demo.molly.mapper;
+
+import com.demo.molly.entity.User;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * 用户 Mapper
+ */
+@Mapper
+public interface UserMapper {
+
+    User findByUsername(String username);
+
+    User findById(Long id);
+
+    int insert(User user);
+
+    int update(User user);
+
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+
+    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted);
+
+    int updateLoginFail(@Param("id") Long id,
+                        @Param("loginFailCount") Integer loginFailCount,
+                        @Param("lockTime") LocalDateTime lockTime);
+
+    int resetLoginFail(@Param("id") Long id);
+
+    List<User> selectList(@Param("username") String username,
+                          @Param("status") Integer status,
+                          @Param("offset") int offset,
+                          @Param("limit") int limit);
+
+    long count(@Param("username") String username, @Param("status") Integer status);
+
+    List<Long> selectRoleIdsByUserId(Long userId);
+
+    int insertUserRoles(@Param("userId") Long userId, @Param("roleIds") List<Long> roleIds);
+
+    int deleteUserRolesByUserId(Long userId);
+}

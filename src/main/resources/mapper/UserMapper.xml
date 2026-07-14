@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.molly.mapper.UserMapper">
+
+    <resultMap id="UserResult" type="com.demo.molly.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="real_name"/>
+        <result property="status" column="status"/>
+        <result property="deleted" column="deleted"/>
+        <result property="loginFailCount" column="login_fail_count"/>
+        <result property="lockTime" column="lock_time"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="userColumns">
+        id, username, password, real_name, status, deleted, login_fail_count, lock_time, created_at, updated_at
+    </sql>
+
+    <select id="findByUsername" resultMap="UserResult">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user
+        WHERE username = #{username} AND deleted = 0
+    </select>
+
+    <select id="findById" resultMap="UserResult">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, status, deleted, login_fail_count, lock_time)
+        VALUES (#{username}, #{password}, #{realName}, #{status}, 0, 0, NULL)
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        SET real_name = #{realName},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_user
+        SET status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateDeleted">
+        UPDATE sys_user
+        SET deleted = #{deleted},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateLoginFail">
+        UPDATE sys_user
+        SET login_fail_count = #{loginFailCount},
+            lock_time = #{lockTime},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="resetLoginFail">
+        UPDATE sys_user
+        SET login_fail_count = 0,
+            lock_time = NULL,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectList" resultMap="UserResult">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user
+        <where>
+            deleted = 0
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM sys_user
+        <where>
+            deleted = 0
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectRoleIdsByUserId" resultType="long">
+        SELECT role_id FROM sys_user_role WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insertUserRoles">
+        INSERT INTO sys_user_role (user_id, role_id) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteUserRolesByUserId">
+        DELETE FROM sys_user_role WHERE user_id = #{userId}
+    </delete>
+</mapper>
