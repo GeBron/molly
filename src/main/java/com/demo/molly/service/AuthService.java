@@ -17,7 +17,7 @@ import com.demo.molly.util.SecurityUtil;
 import com.demo.molly.vo.MenuVO;
 import com.demo.molly.vo.UserInfoVO;
 import com.demo.molly.vo.UserVO;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -128,8 +128,8 @@ public class AuthService {
         UserVO userVO = new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), null, null);
 
         List<Role> roles = roleMapper.selectByUserId(user.getId());
-        List<String> roleCodes = roles.stream().map(Role::getRoleCode).toList();
-        List<Long> roleIds = roles.stream().map(Role::getId).toList();
+        List<String> roleCodes = roles.stream().map(Role::getRoleCode).collect(Collectors.toList());
+        List<Long> roleIds = roles.stream().map(Role::getId).collect(Collectors.toList());
 
         List<String> permissions = loginUser.getPermissions();
         List<MenuVO> menus = buildMenus(roleIds);
@@ -187,7 +187,7 @@ public class AuthService {
         List<Permission> menuPermissions = permissions.stream()
                 .filter(p -> p.getType() == 1 || p.getType() == 2)
                 .sorted(Comparator.comparingInt(p -> p.getSort() == null ? 0 : p.getSort()))
-                .toList();
+                .collect(Collectors.toList());
 
         Map<Long, MenuVO> map = menuPermissions.stream()
                 .collect(Collectors.toMap(Permission::getId, p -> new MenuVO(p.getId(), p.getPermName(), p.getPath(), p.getType(), p.getPermCode(), null, new ArrayList<>())));

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 角色服务
@@ -36,7 +37,7 @@ public class RoleService {
         List<Role> roles = roleMapper.selectList(query.roleName(), query.status(), offset, pageSize);
         long total = roleMapper.count(query.roleName(), query.status());
 
-        List<RoleVO> list = roles.stream().map(this::toVO).toList();
+        List<RoleVO> list = roles.stream().map(this::toVO).collect(Collectors.toList());
         return new PageResult<>(list, total, pageNum, pageSize);
     }
 

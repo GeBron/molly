@@ -8,8 +8,8 @@ import com.demo.molly.util.IpUtil;
 import com.demo.molly.util.SecurityUtil;
 import com.demo.molly.util.SensitiveDataUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -114,8 +114,8 @@ public class OperationLogAspect {
             if (throwable != null) {
                 return throwable.getMessage();
             }
-            if (result instanceof Result<?> r && r.getData() != null) {
-                return SensitiveDataUtil.maskJson(objectMapper.writeValueAsString(r.getData()), objectMapper);
+            if (result instanceof Result<?> && ((Result<?>) result).getData() != null) {
+                return SensitiveDataUtil.maskJson(objectMapper.writeValueAsString(((Result<?>) result).getData()), objectMapper);
             }
             return SensitiveDataUtil.maskJson(objectMapper.writeValueAsString(result), objectMapper);
         } catch (Exception e) {

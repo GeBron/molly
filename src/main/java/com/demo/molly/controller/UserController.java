@@ -9,7 +9,7 @@ import com.demo.molly.dto.UserDTO;
 import com.demo.molly.dto.UserQueryDTO;
 import com.demo.molly.service.UserService;
 import com.demo.molly.vo.UserVO;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;

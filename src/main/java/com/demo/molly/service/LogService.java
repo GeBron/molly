@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 日志服务
@@ -46,7 +47,7 @@ public class LogService {
                         log.getStatus(),
                         log.getMessage(),
                         log.getCreatedAt()))
-                .toList();
+                .collect(Collectors.toList());
         return new PageResult<>(list, total, pageNum, pageSize);
     }
 
@@ -73,7 +74,7 @@ public class LogService {
                         log.getDuration(),
                         log.getIp(),
                         log.getCreatedAt()))
-                .toList();
+                .collect(Collectors.toList());
         return new PageResult<>(list, total, pageNum, pageSize);
     }
 }

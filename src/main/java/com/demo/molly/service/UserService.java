@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务
@@ -47,7 +48,7 @@ public class UserService {
         List<User> users = userMapper.selectList(query.username(), query.status(), offset, pageSize);
         long total = userMapper.count(query.username(), query.status());
 
-        List<UserVO> list = users.stream().map(this::toVO).toList();
+        List<UserVO> list = users.stream().map(this::toVO).collect(Collectors.toList());
         return new PageResult<>(list, total, pageNum, pageSize);
     }
 
@@ -125,8 +126,8 @@ public class UserService {
 
     private UserVO toVO(User user) {
         List<Role> roles = roleMapper.selectByUserId(user.getId());
-        List<Long> roleIds = roles.stream().map(Role::getId).toList();
-        List<String> roleNames = roles.stream().map(Role::getRoleName).toList();
+        List<Long> roleIds = roles.stream().map(Role::getId).collect(Collectors.toList());
+        List<String> roleNames = roles.stream().map(Role::getRoleName).collect(Collectors.toList());
         return new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), roleIds, roleNames);
     }
 }

@@ -6,13 +6,80 @@ import java.util.List;
 /**
  * 用户视图
  */
-public record UserVO(
-        Long id,
-        String username,
-        String realName,
-        Integer status,
-        LocalDateTime createdAt,
-        List<Long> roleIds,
-        List<String> roleNames
-) {
+public class UserVO {
+
+    private final Long id;
+    private final String username;
+    private final String realName;
+    private final Integer status;
+    private final LocalDateTime createdAt;
+    private final List<Long> roleIds;
+    private final List<String> roleNames;
+
+    public UserVO(Long id, String username, String realName, Integer status, LocalDateTime createdAt,
+                  List<Long> roleIds, List<String> roleNames) {
+        this.id = id;
+        this.username = username;
+        this.realName = realName;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.roleIds = roleIds;
+        this.roleNames = roleNames;
+    }
+
+    public Long id() {
+        return id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String realName() {
+        return realName;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public Integer status() {
+        return status;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public LocalDateTime createdAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<Long> roleIds() {
+        return roleIds;
+    }
+
+    public List<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public List<String> roleNames() {
+        return roleNames;
+    }
+
+    public List<String> getRoleNames() {
+        return roleNames;
+    }
 }
