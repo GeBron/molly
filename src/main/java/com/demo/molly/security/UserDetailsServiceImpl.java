@@ -8,7 +8,6 @@ import com.demo.molly.mapper.RoleMapper;
 import com.demo.molly.mapper.UserMapper;
 import com.demo.molly.service.TokenCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,16 +15,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 加载用户信息
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshTokenExpiration;
 
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
@@ -64,9 +59,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 permissions = perms.stream().map(Permission::getPermCode).distinct().toList();
             }
 
-            long expirationSeconds = TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiration);
-            tokenCacheService.cacheUserRoles(user.getId(), roles, expirationSeconds);
-            tokenCacheService.cacheUserPermissions(user.getId(), permissions, expirationSeconds);
+            tokenCacheService.cacheUserRoles(user.getId(), roles);
+            tokenCacheService.cacheUserPermissions(user.getId(), permissions);
         }
 
         return new LoginUser(user, roles, permissions);
