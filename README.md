@@ -48,7 +48,6 @@ Molly 后台管理系统（非前后端分离版本）。
 1. **前端架构**：移除独立的 Vue 3 + Vite 工程，改为放在 `src/main/resources/static/` 下的静态页面，由 Spring Boot 直接托管。
 2. **鉴权方式**：由 JWT（Access Token + Refresh Token）改为传统 Spring Security Session/Cookie 登录。
 3. **跨域配置**：前后端同域运行，删除 `CorsConfig`。
-4. **目录变化**：原 `molly-admin/` 目录保留并重命名为 `molly-admin-vue/`，供对比参考。
 
 ## 环境要求
 
@@ -128,7 +127,6 @@ mvn spring-boot:run
 
 ```
 molly
-├── molly-admin-vue/            # 原 Vue 3 前端（保留参考）
 ├── src/
 │   ├── main/
 │   │   ├── java/com/demo/molly/
