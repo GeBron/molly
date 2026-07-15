@@ -4,40 +4,36 @@
 
 ```mermaid
 graph LR
-    A["浏览器"] -->|HTTP / HTTPS| B["molly-admin 前端"]
-    B -->|JWT Bearer Token| C["molly 后端 Spring Boot"]
-    C --> D["Spring Security"]
-    D --> E["Controller"]
-    E --> F["Service"]
-    F --> G["MyBatis Mapper"]
-    G --> H["TiDB Cloud MySQL"]
-    E --> I["操作日志 AOP"]
-    E --> J["登录日志"]
+    A["浏览器"] -->|HTTP / HTTPS| B["molly 后端 Spring Boot"]
+    B --> C["Spring Security"]
+    C --> D["Controller"]
+    D --> E["Service"]
+    E --> F["MyBatis Mapper"]
+    F --> G["TiDB Cloud MySQL"]
+    D --> H["操作日志 AOP"]
+    D --> I["登录日志"]
 ```
 
 ## 2. 技术说明
 
-- **前端**：Vue 3 + TypeScript + Vite + Element Plus + Vue Router 4 + Pinia + Axios
-- **后端**：Spring Boot 4.0.7 + Spring Security + MyBatis + MySQL/TiDB
-- **认证**：JWT 单 Token，有效期 24 小时
+- **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），静态页面位于 `src/main/resources/static/`，由 Spring Boot 直接托管
+- **后端**：Spring Boot 3.2.7 + Spring Security + MyBatis + MySQL/TiDB
+- **认证**：Spring Security Session/Cookie 登录
 - **权限模型**：RBAC，用户 -> 角色 -> 权限
 - **数据库**：TiDB Cloud MySQL 兼容实例
-- **部署**：前端静态资源由 Nginx 托管，反向代理 `/api` 到后端服务
+- **部署**：Spring Boot 内置容器直接运行，静态资源由后端托管
 
-## 3. 路由定义
+## 3. 页面路径
 
-| 路由 | 用途 |
+| 页面 | 路径 |
 |---|---|
-| `/login` | 登录页 |
-| `/` | 主布局，重定向到首页 |
-| `/dashboard` | 首页 Dashboard |
-| `/system/user` | 用户管理 |
-| `/system/role` | 角色管理 |
-| `/system/permission` | 权限管理 |
-| `/system/login-log` | 登录日志 |
-| `/system/operation-log` | 操作日志 |
-| `/403` | 无权限提示页 |
-| `/*` | 404 页面 |
+| 登录页 | `/login.html` |
+| 首页 Dashboard | `/dashboard.html` |
+| 用户管理 | `/users.html` |
+| 角色管理 | `/roles.html` |
+| 权限管理 | `/permissions.html` |
+| 登录日志 | `/login-logs.html` |
+| 操作日志 | `/operation-logs.html` |
 
 ## 4. API 定义
 
@@ -50,9 +46,8 @@ interface LoginRequest {
 }
 
 interface LoginResponse {
-  token: string
-  tokenType: string
-  expiresIn: number
+  code: number
+  message: string
 }
 
 interface UserInfo {
@@ -199,5 +194,5 @@ erDiagram
 
 ### 6.2 数据定义
 
-建表语句与初始化数据由后端 `src/main/resources/schema.sql` 与 `data.sql` 提供，`admin` 账号由 `SystemInitRunner` 在应用启动时生成。
+建表语句与初始化数据由 Flyway 迁移脚本 `src/main/resources/db/migration/V1__init_schema.sql` 与 `V2__init_data.sql` 提供。
 
