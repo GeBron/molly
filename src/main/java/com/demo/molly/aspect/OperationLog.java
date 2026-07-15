@@ -15,4 +15,14 @@ public @interface OperationLog {
     String module();
 
     String operation();
+
+    boolean saveParams() default true;
+
+    boolean saveResult() default true;
+
+    String[] sensitiveFields() default {};
+
+    int maxParamLength() default 10 * 1024;
+
+    int maxResultLength() default 10 * 1024;
 }

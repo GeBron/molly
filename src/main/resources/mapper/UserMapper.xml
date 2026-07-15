@@ -13,10 +13,12 @@
         <result property="lockTime" column="lock_time"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
     </resultMap>
 
     <sql id="userColumns">
-        id, username, password, real_name, status, deleted, login_fail_count, lock_time, created_at, updated_at
+        id, username, password, real_name, status, deleted, login_fail_count, lock_time, created_at, updated_at, created_by, updated_by
     </sql>
 
     <select id="findByUsername" resultMap="UserResult">
@@ -32,29 +34,32 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_user (username, password, real_name, status, deleted, login_fail_count, lock_time)
-        VALUES (#{username}, #{password}, #{realName}, #{status}, 0, 0, NULL)
+        INSERT INTO sys_user (username, password, real_name, status, deleted, login_fail_count, lock_time, created_by, updated_by)
+        VALUES (#{username}, #{password}, #{realName}, #{status}, 0, 0, NULL, #{createdBy}, #{updatedBy})
     </insert>
 
     <update id="update">
         UPDATE sys_user
         SET real_name = #{realName},
             status = #{status},
-            updated_at = NOW()
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
         WHERE id = #{id} AND deleted = 0
     </update>
 
     <update id="updateStatus">
         UPDATE sys_user
         SET status = #{status},
-            updated_at = NOW()
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
         WHERE id = #{id} AND deleted = 0
     </update>
 
     <update id="updateDeleted">
         UPDATE sys_user
         SET deleted = #{deleted},
-            updated_at = NOW()
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
         WHERE id = #{id}
     </update>
 
@@ -62,7 +67,8 @@
         UPDATE sys_user
         SET login_fail_count = #{loginFailCount},
             lock_time = #{lockTime},
-            updated_at = NOW()
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
         WHERE id = #{id}
     </update>
 
@@ -70,7 +76,8 @@
         UPDATE sys_user
         SET login_fail_count = 0,
             lock_time = NULL,
-            updated_at = NOW()
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
         WHERE id = #{id}
     </update>
 
@@ -109,9 +116,9 @@
     </select>
 
     <insert id="insertUserRoles">
-        INSERT INTO sys_user_role (user_id, role_id) VALUES
+        INSERT INTO sys_user_role (user_id, role_id, created_by, updated_by) VALUES
         <foreach collection="roleIds" item="roleId" separator=",">
-            (#{userId}, #{roleId})
+            (#{userId}, #{roleId}, #{createdBy}, #{updatedBy})
         </foreach>
     </insert>
 

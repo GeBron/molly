@@ -11,17 +11,22 @@
         <result property="status" column="status"/>
         <result property="message" column="message"/>
         <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="deleted" column="deleted"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_login_log (user_id, username, ip, operation, status, message)
-        VALUES (#{userId}, #{username}, #{ip}, #{operation}, #{status}, #{message})
+        INSERT INTO sys_login_log (user_id, username, ip, operation, status, message, created_by, updated_by)
+        VALUES (#{userId}, #{username}, #{ip}, #{operation}, #{status}, #{message}, #{createdBy}, #{updatedBy})
     </insert>
 
     <select id="selectList" resultMap="LoginLogResult">
-        SELECT id, user_id, username, ip, operation, status, message, created_at
+        SELECT id, user_id, username, ip, operation, status, message, created_at, created_by, updated_by
         FROM sys_login_log
         <where>
+            deleted = 0
             <if test="startTime != null">
                 AND created_at &gt;= #{startTime}
             </if>
@@ -37,6 +42,7 @@
         SELECT COUNT(*)
         FROM sys_login_log
         <where>
+            deleted = 0
             <if test="startTime != null">
                 AND created_at &gt;= #{startTime}
             </if>

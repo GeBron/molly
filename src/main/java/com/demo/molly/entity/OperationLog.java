@@ -1,13 +1,10 @@
 package com.demo.molly.entity;
 
-import java.time.LocalDateTime;
-
 /**
  * 操作日志实体
  */
-public class OperationLog {
+public class OperationLog extends BaseEntity {
 
-    private Long id;
     private Long userId;
     private String username;
     private String module;
@@ -19,15 +16,7 @@ public class OperationLog {
     private String result;
     private Long duration;
     private String ip;
-    private LocalDateTime createdAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Integer status;
 
     public Long getUserId() {
         return userId;
@@ -117,11 +106,11 @@ public class OperationLog {
         this.ip = ip;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

@@ -1,13 +1,10 @@
 package com.demo.molly.entity;
 
-import java.time.LocalDateTime;
-
 /**
  * 权限实体
  */
-public class Permission {
+public class Permission extends BaseEntity {
 
-    private Long id;
     private String permCode;
     private String permName;
     private Integer type;
@@ -15,17 +12,6 @@ public class Permission {
     private String path;
     private Integer sort;
     private Integer status;
-    private Integer deleted;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getPermCode() {
         return permCode;
@@ -81,29 +67,5 @@ public class Permission {
 
     public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public Integer getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Integer deleted) {
-        this.deleted = deleted;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

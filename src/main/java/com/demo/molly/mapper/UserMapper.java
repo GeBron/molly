@@ -21,15 +21,16 @@ public interface UserMapper {
 
     int update(User user);
 
-    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status, @Param("updatedBy") Long updatedBy);
 
-    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted);
+    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted, @Param("updatedBy") Long updatedBy);
 
     int updateLoginFail(@Param("id") Long id,
                         @Param("loginFailCount") Integer loginFailCount,
-                        @Param("lockTime") LocalDateTime lockTime);
+                        @Param("lockTime") LocalDateTime lockTime,
+                        @Param("updatedBy") Long updatedBy);
 
-    int resetLoginFail(@Param("id") Long id);
+    int resetLoginFail(@Param("id") Long id, @Param("updatedBy") Long updatedBy);
 
     List<User> selectList(@Param("username") String username,
                           @Param("status") Integer status,
@@ -40,7 +41,10 @@ public interface UserMapper {
 
     List<Long> selectRoleIdsByUserId(Long userId);
 
-    int insertUserRoles(@Param("userId") Long userId, @Param("roleIds") List<Long> roleIds);
+    int insertUserRoles(@Param("userId") Long userId,
+                        @Param("roleIds") List<Long> roleIds,
+                        @Param("createdBy") Long createdBy,
+                        @Param("updatedBy") Long updatedBy);
 
     int deleteUserRolesByUserId(Long userId);
 }

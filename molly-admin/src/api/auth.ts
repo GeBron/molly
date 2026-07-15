@@ -5,6 +5,10 @@ export function login(data: LoginDTO) {
   return post<LoginVO>('/auth/login', data)
 }
 
+export function refresh() {
+  return post<LoginVO>('/auth/refresh')
+}
+
 export function logout() {
   return post<null>('/auth/logout')
 }

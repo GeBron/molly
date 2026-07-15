@@ -1,28 +1,16 @@
 package com.demo.molly.entity;
 
-import java.time.LocalDateTime;
-
 /**
  * 登录日志实体
  */
-public class LoginLog {
+public class LoginLog extends BaseEntity {
 
-    private Long id;
     private Long userId;
     private String username;
     private String ip;
     private String operation;
     private String status;
     private String message;
-    private LocalDateTime createdAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Long getUserId() {
         return userId;
@@ -70,13 +58,5 @@ public class LoginLog {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

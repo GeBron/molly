@@ -7,6 +7,7 @@ import com.demo.molly.dto.RoleQueryDTO;
 import com.demo.molly.entity.Role;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.mapper.RoleMapper;
+import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.RoleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class RoleService {
         role.setRoleCode(dto.roleCode());
         role.setRoleName(dto.roleName());
         role.setStatus(dto.status() == null ? 1 : dto.status());
+        AuditUtil.fillCreate(role);
         roleMapper.insert(role);
     }
 
@@ -73,6 +75,7 @@ public class RoleService {
         role.setRoleCode(dto.roleCode());
         role.setRoleName(dto.roleName());
         role.setStatus(dto.status());
+        AuditUtil.fillUpdate(role);
         roleMapper.update(role);
     }
 
@@ -85,7 +88,7 @@ public class RoleService {
         if ("admin".equals(role.getRoleCode())) {
             throw new BusinessException("不能删除超级管理员角色");
         }
-        roleMapper.updateDeleted(id, 1);
+        roleMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
         roleMapper.deleteRolePermissionsByRoleId(id);
     }
 
@@ -98,7 +101,7 @@ public class RoleService {
         if ("admin".equals(role.getRoleCode()) && status != 1) {
             throw new BusinessException("不能禁用超级管理员角色");
         }
-        roleMapper.updateStatus(id, status);
+        roleMapper.updateStatus(id, status, AuditUtil.currentUserId());
     }
 
     @Transactional
@@ -109,7 +112,7 @@ public class RoleService {
         }
         roleMapper.deleteRolePermissionsByRoleId(roleId);
         if (dto.permissionIds() != null && !dto.permissionIds().isEmpty()) {
-            roleMapper.insertRolePermissions(roleId, dto.permissionIds());
+            roleMapper.insertRolePermissions(roleId, dto.permissionIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
     }
 

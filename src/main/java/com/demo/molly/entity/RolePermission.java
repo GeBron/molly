@@ -3,7 +3,7 @@ package com.demo.molly.entity;
 /**
  * 角色权限关联实体
  */
-public class RolePermission {
+public class RolePermission extends BaseEntity {
 
     private Long roleId;
     private Long permissionId;
