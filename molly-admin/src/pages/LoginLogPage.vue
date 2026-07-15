@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
+
 import * as logApi from '@/api/log'
 import type { LogQueryDTO, LoginLogVO } from '@/types'
 

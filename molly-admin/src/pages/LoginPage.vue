@@ -16,8 +16,8 @@ async function submit() {
   errorMsg.value = ''
   try {
     await login(form.value.username, form.value.password)
-  } catch (e: any) {
-    errorMsg.value = e.message || '登录失败'
+  } catch (e: unknown) {
+    errorMsg.value = e instanceof Error ? e.message : '登录失败'
   } finally {
     loading.value = false
   }

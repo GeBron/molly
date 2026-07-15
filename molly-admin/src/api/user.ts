@@ -2,7 +2,6 @@ import { get, post, put, del } from '@/utils/request'
 import type {
   AssignRoleDTO,
   PageResult,
-  Result,
   UpdateUserDTO,
   UserDTO,
   UserQueryDTO,
