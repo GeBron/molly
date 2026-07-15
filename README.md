@@ -1,8 +1,6 @@
-# molly (classic 分支)
+# molly
 
-Molly 后台管理系统（非前后端分离版本）。
-
-该分支从 `master` 切出，将原来的 Vue 3 前端改造为传统服务端托管的 jQuery + Bootstrap 多页面应用，后端鉴权由 JWT 改为 Session/Cookie。
+Molly 后台管理系统（非前后端分离版本），基于 Spring Boot 服务端托管的 jQuery + Bootstrap 多页面应用，使用 Spring Security Session/Cookie 登录鉴权。
 
 ## 项目信息
 
@@ -11,8 +9,8 @@ Molly 后台管理系统（非前后端分离版本）。
 | 项目名 | molly |
 | 包名 | `com.demo.molly` |
 | 构建工具 | Maven |
-| Spring Boot | 3.2.7 |
-| Java | 17 |
+| Spring Boot | 4.1.0 |
+| Java | 25 |
 | 数据库 | TiDB Cloud（MySQL 兼容）/ MySQL |
 | 缓存 | Redis |
 | 前端 | jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN） |
@@ -21,14 +19,14 @@ Molly 后台管理系统（非前后端分离版本）。
 
 ### 后端
 
-- Java 17
-- Spring Boot 3.2.7
+- Java 25
+- Spring Boot 4.1.0
 - Spring Web
 - Spring Security（Session/Cookie 登录）
 - Spring Validation
 - Spring AOP
 - Spring Data Redis
-- MyBatis Spring Boot Starter 3.0.4
+- MyBatis Spring Boot Starter 4.0.1
 - MySQL Connector/J
 - Flyway
 
@@ -43,15 +41,9 @@ Molly 后台管理系统（非前后端分离版本）。
 
 所有前端依赖均通过 CDN 引入。
 
-## 与 master 分支的主要差异
-
-1. **前端架构**：移除独立的 Vue 3 + Vite 工程，改为放在 `src/main/resources/static/` 下的静态页面，由 Spring Boot 直接托管。
-2. **鉴权方式**：由 JWT（Access Token + Refresh Token）改为传统 Spring Security Session/Cookie 登录。
-3. **跨域配置**：前后端同域运行，删除 `CorsConfig`。
-
 ## 环境要求
 
-- JDK 17 及以上
+- JDK 25 及以上
 - Maven 3.9 及以上
 - Redis 服务（本地或远程，默认 `localhost:6379`）
 - TiDB Cloud / MySQL 数据库

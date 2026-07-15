@@ -17,7 +17,7 @@ graph LR
 ## 2. 技术说明
 
 - **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），静态页面位于 `src/main/resources/static/`，由 Spring Boot 直接托管
-- **后端**：Spring Boot 3.2.7 + Spring Security + MyBatis + MySQL/TiDB
+- **后端**：Spring Boot 4.1.0 + Spring Security + MyBatis + MySQL/TiDB
 - **认证**：Spring Security Session/Cookie 登录
 - **权限模型**：RBAC，用户 -> 角色 -> 权限
 - **数据库**：TiDB Cloud MySQL 兼容实例
