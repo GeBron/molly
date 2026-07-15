@@ -19,7 +19,7 @@ public class Result<T> {
     }
 
     public static <T> Result<T> success(T data) {
-        return new Result<>(200, "操作成功", data);
+        return new Result<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
     }
 
     public static <T> Result<T> success() {
@@ -27,7 +27,11 @@ public class Result<T> {
     }
 
     public static <T> Result<T> error(String message) {
-        return new Result<>(500, message, null);
+        return new Result<>(ErrorCode.INTERNAL_ERROR.getCode(), message, null);
+    }
+
+    public static <T> Result<T> error(ErrorCode errorCode) {
+        return new Result<>(errorCode.getCode(), errorCode.getMessage(), null);
     }
 
     public static <T> Result<T> error(int code, String message) {

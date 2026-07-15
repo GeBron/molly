@@ -4,6 +4,7 @@ import com.demo.molly.dto.PermissionDTO;
 import com.demo.molly.entity.Permission;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.mapper.PermissionMapper;
+import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.PermissionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class PermissionService {
         permission.setPath(dto.path());
         permission.setSort(dto.sort() == null ? 0 : dto.sort());
         permission.setStatus(dto.status() == null ? 1 : dto.status());
+        AuditUtil.fillCreate(permission);
         permissionMapper.insert(permission);
     }
 
@@ -75,6 +77,7 @@ public class PermissionService {
         permission.setPath(dto.path());
         permission.setSort(dto.sort() == null ? 0 : dto.sort());
         permission.setStatus(dto.status());
+        AuditUtil.fillUpdate(permission);
         permissionMapper.update(permission);
     }
 
@@ -84,7 +87,7 @@ public class PermissionService {
         if (permission == null) {
             throw new BusinessException("权限不存在");
         }
-        permissionMapper.updateDeleted(id, 1);
+        permissionMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
     }
 
     @Transactional
@@ -93,7 +96,7 @@ public class PermissionService {
         if (permission == null) {
             throw new BusinessException("权限不存在");
         }
-        permissionMapper.updateStatus(id, status);
+        permissionMapper.updateStatus(id, status, AuditUtil.currentUserId());
     }
 
     private List<PermissionVO> buildTree(List<Permission> permissions) {

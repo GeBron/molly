@@ -1,19 +1,18 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import router from '@/router'
 import * as authApi from '@/api/auth'
 import type { UserInfoVO } from '@/types'
+import { accessToken, setAccessToken, clearAccessToken } from '@/utils/token'
 
-const token = ref<string>(localStorage.getItem('token') || '')
 const userInfo = ref<UserInfoVO | null>(null)
 
 export function useAuth() {
-  const isLoggedIn = computed(() => !!token.value)
+  const isLoggedIn = computed(() => !!accessToken.value)
 
   async function login(username: string, password: string) {
     const res = await authApi.login({ username, password })
     if (res.code === 200 && res.data) {
-      token.value = res.data.token
-      localStorage.setItem('token', res.data.token)
+      setAccessToken(res.data.token)
       await loadUserInfo()
       router.push('/')
     } else {
@@ -25,25 +24,25 @@ export function useAuth() {
     const res = await authApi.info()
     if (res.code === 200 && res.data) {
       userInfo.value = res.data
+      const { generateRoutes } = await import('@/router')
+      generateRoutes(res.data.menus)
     }
   }
 
   function logout() {
     authApi.logout().catch(() => {})
-    token.value = ''
+    clearAccessToken()
     userInfo.value = null
-    localStorage.removeItem('token')
     router.push('/login')
   }
 
   function clearAuth() {
-    token.value = ''
+    clearAccessToken()
     userInfo.value = null
-    localStorage.removeItem('token')
   }
 
   return {
-    token,
+    accessToken,
     userInfo,
     isLoggedIn,
     login,

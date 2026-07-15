@@ -42,6 +42,8 @@ export interface MenuVO {
   name: string
   path: string
   type: number
+  permCode?: string
+  icon?: string
   children: MenuVO[]
 }
 

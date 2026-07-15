@@ -20,9 +20,9 @@ public interface RoleMapper {
 
     int update(Role role);
 
-    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status, @Param("updatedBy") Long updatedBy);
 
-    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted);
+    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted, @Param("updatedBy") Long updatedBy);
 
     List<Role> selectList(@Param("roleName") String roleName,
                           @Param("status") Integer status,
@@ -35,7 +35,10 @@ public interface RoleMapper {
 
     List<Long> selectPermissionIdsByRoleId(Long roleId);
 
-    int insertRolePermissions(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
+    int insertRolePermissions(@Param("roleId") Long roleId,
+                              @Param("permissionIds") List<Long> permissionIds,
+                              @Param("createdBy") Long createdBy,
+                              @Param("updatedBy") Long updatedBy);
 
     int deleteRolePermissionsByRoleId(Long roleId);
 }

@@ -20,9 +20,9 @@ public interface PermissionMapper {
 
     int update(Permission permission);
 
-    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status, @Param("updatedBy") Long updatedBy);
 
-    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted);
+    int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted, @Param("updatedBy") Long updatedBy);
 
     List<Permission> selectAll();
 

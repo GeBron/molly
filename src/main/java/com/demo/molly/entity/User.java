@@ -5,26 +5,14 @@ import java.time.LocalDateTime;
 /**
  * 用户实体
  */
-public class User {
+public class User extends BaseEntity {
 
-    private Long id;
     private String username;
     private String password;
     private String realName;
     private Integer status;
-    private Integer deleted;
     private Integer loginFailCount;
     private LocalDateTime lockTime;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;
@@ -58,14 +46,6 @@ public class User {
         this.status = status;
     }
 
-    public Integer getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Integer deleted) {
-        this.deleted = deleted;
-    }
-
     public Integer getLoginFailCount() {
         return loginFailCount;
     }
@@ -80,21 +60,5 @@ public class User {
 
     public void setLockTime(LocalDateTime lockTime) {
         this.lockTime = lockTime;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

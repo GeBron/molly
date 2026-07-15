@@ -10,6 +10,8 @@ public record MenuVO(
         String name,
         String path,
         Integer type,
+        String permCode,
+        String icon,
         List<MenuVO> children
 ) {
 }

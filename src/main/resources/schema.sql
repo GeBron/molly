@@ -4,11 +4,13 @@ CREATE TABLE IF NOT EXISTS sys_user (
     password VARCHAR(128) NOT NULL COMMENT '密码',
     real_name VARCHAR(64) DEFAULT NULL COMMENT '真实姓名',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     login_fail_count INT NOT NULL DEFAULT 0 COMMENT '连续登录失败次数',
     lock_time DATETIME DEFAULT NULL COMMENT '锁定时间',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     INDEX idx_status (status),
     INDEX idx_deleted (deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
@@ -18,9 +20,11 @@ CREATE TABLE IF NOT EXISTS sys_role (
     role_code VARCHAR(64) NOT NULL UNIQUE COMMENT '角色编码',
     role_name VARCHAR(64) NOT NULL COMMENT '角色名称',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     INDEX idx_status (status),
     INDEX idx_deleted (deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
@@ -34,9 +38,11 @@ CREATE TABLE IF NOT EXISTS sys_permission (
     path VARCHAR(255) DEFAULT NULL COMMENT '路由或接口地址',
     sort INT NOT NULL DEFAULT 0 COMMENT '排序',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     INDEX idx_parent_id (parent_id),
     INDEX idx_type (type),
     INDEX idx_status (status),
@@ -44,16 +50,28 @@ CREATE TABLE IF NOT EXISTS sys_permission (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限表';
 
 CREATE TABLE IF NOT EXISTS sys_user_role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
     user_id BIGINT NOT NULL COMMENT '用户ID',
     role_id BIGINT NOT NULL COMMENT '角色ID',
-    PRIMARY KEY (user_id, role_id),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
+    UNIQUE KEY uk_user_role (user_id, role_id),
     INDEX idx_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
 
 CREATE TABLE IF NOT EXISTS sys_role_permission (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
     role_id BIGINT NOT NULL COMMENT '角色ID',
     permission_id BIGINT NOT NULL COMMENT '权限ID',
-    PRIMARY KEY (role_id, permission_id),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
+    UNIQUE KEY uk_role_permission (role_id, permission_id),
     INDEX idx_permission_id (permission_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色权限关联表';
 
@@ -66,6 +84,10 @@ CREATE TABLE IF NOT EXISTS sys_login_log (
     status VARCHAR(16) NOT NULL COMMENT '状态：SUCCESS/FAIL',
     message VARCHAR(255) DEFAULT NULL COMMENT '消息',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     INDEX idx_user_id (user_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日志表';
@@ -83,7 +105,12 @@ CREATE TABLE IF NOT EXISTS sys_operation_log (
     result TEXT COMMENT '返回结果',
     duration BIGINT DEFAULT NULL COMMENT '执行时长（毫秒）',
     ip VARCHAR(64) DEFAULT NULL COMMENT 'IP地址',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1成功 0失败',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
     INDEX idx_user_id (user_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志表';

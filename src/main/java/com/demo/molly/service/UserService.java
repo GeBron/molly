@@ -10,6 +10,8 @@ import com.demo.molly.entity.User;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.mapper.RoleMapper;
 import com.demo.molly.mapper.UserMapper;
+import com.demo.molly.service.TokenCacheService;
+import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,12 +29,14 @@ public class UserService {
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final PasswordEncoder passwordEncoder;
+    private final TokenCacheService tokenCacheService;
 
     @Autowired
-    public UserService(UserMapper userMapper, RoleMapper roleMapper, PasswordEncoder passwordEncoder) {
+    public UserService(UserMapper userMapper, RoleMapper roleMapper, PasswordEncoder passwordEncoder, TokenCacheService tokenCacheService) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
+        this.tokenCacheService = tokenCacheService;
     }
 
     public PageResult<UserVO> list(UserQueryDTO query) {
@@ -66,6 +70,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRealName(dto.realName());
         user.setStatus(dto.status() == null ? 1 : dto.status());
+        AuditUtil.fillCreate(user);
         userMapper.insert(user);
     }
 
@@ -77,6 +82,7 @@ public class UserService {
         }
         user.setRealName(dto.realName());
         user.setStatus(dto.status());
+        AuditUtil.fillUpdate(user);
         userMapper.update(user);
     }
 
@@ -89,7 +95,7 @@ public class UserService {
         if ("admin".equals(user.getUsername())) {
             throw new BusinessException("不能删除超级管理员");
         }
-        userMapper.updateDeleted(id, 1);
+        userMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
     }
 
     @Transactional
@@ -101,7 +107,7 @@ public class UserService {
         if ("admin".equals(user.getUsername()) && status != 1) {
             throw new BusinessException("不能禁用超级管理员");
         }
-        userMapper.updateStatus(id, status);
+        userMapper.updateStatus(id, status, AuditUtil.currentUserId());
     }
 
     @Transactional
@@ -112,8 +118,9 @@ public class UserService {
         }
         userMapper.deleteUserRolesByUserId(userId);
         if (dto.roleIds() != null && !dto.roleIds().isEmpty()) {
-            userMapper.insertUserRoles(userId, dto.roleIds());
+            userMapper.insertUserRoles(userId, dto.roleIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
+        tokenCacheService.clearUserCache(userId);
     }
 
     private UserVO toVO(User user) {
