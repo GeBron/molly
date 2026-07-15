@@ -14,8 +14,7 @@ import java.util.Set;
 public class SensitiveDataUtil {
 
     private static final Set<String> DEFAULT_SENSITIVE_FIELDS = Set.of(
-            "password", "oldPassword", "newPassword", "confirmPassword",
-            "accessToken", "refreshToken", "token"
+            "password", "oldPassword", "newPassword", "confirmPassword"
     );
 
     private static final String MASK = "******";

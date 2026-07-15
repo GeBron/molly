@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ public class TokenCacheService {
     private static final String USER_PERMISSIONS_PREFIX = "user:permissions:";
     private static final String USER_ROLES_PREFIX = "user:roles:";
 
+    @Value("${session.cache-timeout:1800}")
+    private long cacheTimeoutSeconds;
+
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -26,6 +30,10 @@ public class TokenCacheService {
     public TokenCacheService(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+    }
+
+    public void cacheUserPermissions(Long userId, List<String> permissions) {
+        cacheUserPermissions(userId, permissions, cacheTimeoutSeconds);
     }
 
     public void cacheUserPermissions(Long userId, List<String> permissions, long expirationSeconds) {
@@ -51,6 +59,10 @@ public class TokenCacheService {
 
     public void deleteUserPermissions(Long userId) {
         redisTemplate.delete(USER_PERMISSIONS_PREFIX + userId);
+    }
+
+    public void cacheUserRoles(Long userId, List<String> roles) {
+        cacheUserRoles(userId, roles, cacheTimeoutSeconds);
     }
 
     public void cacheUserRoles(Long userId, List<String> roles, long expirationSeconds) {

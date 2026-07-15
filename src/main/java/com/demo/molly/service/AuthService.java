@@ -10,23 +10,21 @@ import com.demo.molly.mapper.LoginLogMapper;
 import com.demo.molly.mapper.PermissionMapper;
 import com.demo.molly.mapper.RoleMapper;
 import com.demo.molly.mapper.UserMapper;
-import com.demo.molly.security.JwtUtil;
 import com.demo.molly.security.LoginUser;
 import com.demo.molly.security.UserDetailsServiceImpl;
-import com.demo.molly.util.AuditUtil;
 import com.demo.molly.util.IpUtil;
 import com.demo.molly.util.SecurityUtil;
-import com.demo.molly.vo.LoginResult;
 import com.demo.molly.vo.MenuVO;
 import com.demo.molly.vo.UserInfoVO;
 import com.demo.molly.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -44,44 +41,32 @@ import java.util.stream.Collectors;
 @Service
 public class AuthService {
 
-    @Value("${jwt.access-token-expiration}")
-    private long accessTokenExpiration;
-
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshTokenExpiration;
-
     private final AuthenticationManager authenticationManager;
     private final UserDetailsServiceImpl userDetailsService;
-    private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final PermissionMapper permissionMapper;
     private final LoginLogMapper loginLogMapper;
-    private final TokenBlacklistService tokenBlacklistService;
     private final TokenCacheService tokenCacheService;
 
     @Autowired
     public AuthService(AuthenticationManager authenticationManager,
                        UserDetailsServiceImpl userDetailsService,
-                       JwtUtil jwtUtil,
                        UserMapper userMapper,
                        RoleMapper roleMapper,
                        PermissionMapper permissionMapper,
                        LoginLogMapper loginLogMapper,
-                       TokenBlacklistService tokenBlacklistService,
                        TokenCacheService tokenCacheService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
-        this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.permissionMapper = permissionMapper;
         this.loginLogMapper = loginLogMapper;
-        this.tokenBlacklistService = tokenBlacklistService;
         this.tokenCacheService = tokenCacheService;
     }
 
-    public LoginResult login(LoginDTO dto, HttpServletRequest request) {
+    public UserInfoVO login(LoginDTO dto, HttpServletRequest request) {
         User user = userMapper.findByUsername(dto.username());
         if (user == null) {
             saveLoginLog(null, dto.username(), "LOGIN", "FAIL", "用户不存在", request);
@@ -97,8 +82,9 @@ public class AuthService {
         }
 
         try {
-            authenticationManager.authenticate(
+            Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.username(), dto.password()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
             handleLoginFail(user, request);
             throw new BusinessException(401, "用户名或密码错误");
@@ -114,72 +100,19 @@ public class AuthService {
         LoginUser loginUser = (LoginUser) userDetails;
         cacheUserAuthInfo(loginUser);
 
-        String accessToken = jwtUtil.generateAccessToken(userDetails);
-        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
-        return new LoginResult(accessToken, refreshToken, TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiration));
+        return buildUserInfo(loginUser);
     }
 
-    public LoginResult refresh(String refreshToken, HttpServletRequest request) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new BusinessException(401, "Refresh Token 不能为空");
-        }
-        try {
-            String jti = jwtUtil.getJtiFromRefreshToken(refreshToken);
-            if (tokenBlacklistService.isRefreshTokenBlacklisted(jti)) {
-                throw new BusinessException(401, "Refresh Token 已失效");
-            }
-            String username = jwtUtil.getUsernameFromRefreshToken(refreshToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (!jwtUtil.validateRefreshToken(refreshToken, userDetails)) {
-                throw new BusinessException(401, "Refresh Token 无效或已过期");
-            }
-
-            LoginUser loginUser = (LoginUser) userDetails;
-            cacheUserAuthInfo(loginUser);
-
-            String newAccessToken = jwtUtil.generateAccessToken(userDetails);
-            String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
-
-            // 刷新后使旧 Refresh Token 失效（单点使用场景）
-            long oldRefreshTtl = Math.max(0, (jwtUtil.parseRefreshToken(refreshToken).getExpiration().getTime() - System.currentTimeMillis()) / 1000);
-            tokenBlacklistService.blacklistRefreshToken(jti, oldRefreshTtl);
-
-            saveLoginLog(loginUser.getUser().getId(), loginUser.getUsername(), "REFRESH", "SUCCESS", null, request);
-            return new LoginResult(newAccessToken, newRefreshToken, TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiration));
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new BusinessException(401, "Refresh Token 无效");
-        }
-    }
-
-    public void logout(String accessToken, String refreshToken, HttpServletRequest request) {
+    public void logout(HttpServletRequest request) {
         LoginUser loginUser = SecurityUtil.getCurrentUser();
         Long userId = loginUser != null ? loginUser.getUser().getId() : null;
         String username = loginUser != null ? loginUser.getUsername() : null;
-
-        if (accessToken != null && !accessToken.isBlank()) {
-            try {
-                String jti = jwtUtil.getJtiFromAccessToken(accessToken);
-                long ttl = Math.max(0, (jwtUtil.getExpirationFromAccessToken(accessToken).getTime() - System.currentTimeMillis()) / 1000);
-                tokenBlacklistService.blacklistAccessToken(jti, ttl);
-            } catch (Exception ignored) {
-            }
-        }
-
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            try {
-                String jti = jwtUtil.getJtiFromRefreshToken(refreshToken);
-                long ttl = Math.max(0, (jwtUtil.parseRefreshToken(refreshToken).getExpiration().getTime() - System.currentTimeMillis()) / 1000);
-                tokenBlacklistService.blacklistRefreshToken(jti, ttl);
-            } catch (Exception ignored) {
-            }
-        }
 
         if (userId != null) {
             tokenCacheService.clearUserCache(userId);
             saveLoginLog(userId, username, "LOGOUT", "SUCCESS", null, request);
         }
+        SecurityContextHolder.clearContext();
     }
 
     public UserInfoVO getUserInfo() {
@@ -187,6 +120,10 @@ public class AuthService {
         if (loginUser == null) {
             throw new BusinessException(401, "未登录");
         }
+        return buildUserInfo(loginUser);
+    }
+
+    private UserInfoVO buildUserInfo(LoginUser loginUser) {
         User user = loginUser.getUser();
         UserVO userVO = new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), null, null);
 
@@ -201,9 +138,8 @@ public class AuthService {
     }
 
     private void cacheUserAuthInfo(LoginUser loginUser) {
-        long expirationSeconds = TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiration);
-        tokenCacheService.cacheUserRoles(loginUser.getUser().getId(), loginUser.getRoles(), expirationSeconds);
-        tokenCacheService.cacheUserPermissions(loginUser.getUser().getId(), loginUser.getPermissions(), expirationSeconds);
+        tokenCacheService.cacheUserRoles(loginUser.getUser().getId(), loginUser.getRoles());
+        tokenCacheService.cacheUserPermissions(loginUser.getUser().getId(), loginUser.getPermissions());
     }
 
     private boolean isLocked(User user) {
