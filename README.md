@@ -138,8 +138,8 @@ java -jar target/molly-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 
 ```bash
 cd molly-admin
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
 前端默认运行在 `http://localhost:5173`，并已配置跨域代理到后端 `http://localhost:8080`。
@@ -181,12 +181,12 @@ pnpm run dev
 
 | 命令 | 说明 |
 | --- | --- |
-| `pnpm install` | 安装依赖 |
-| `pnpm run dev` | 启动开发服务器 |
-| `pnpm run build` | 生产构建 |
-| `pnpm run check` | TypeScript 类型检查 |
-| `pnpm run lint` | 运行 ESLint |
-| `pnpm run lint:fix` | 自动修复 ESLint 问题 |
+| `npm install` | 安装依赖 |
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 生产构建 |
+| `npm run check` | TypeScript 类型检查 |
+| `npm run lint` | 运行 ESLint |
+| `npm run lint:fix` | 自动修复 ESLint 问题 |
 
 ## 部署
 
@@ -203,7 +203,7 @@ java -jar target/molly-0.0.1-SNAPSHOT.jar
 
 ```bash
 cd molly-admin
-pnpm run build
+npm run build
 ```
 
 构建产物位于 `molly-admin/dist`，可部署到任意静态资源服务器。
