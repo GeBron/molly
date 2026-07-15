@@ -13,9 +13,9 @@ import java.util.Set;
  */
 public class SensitiveDataUtil {
 
-    private static final Set<String> DEFAULT_SENSITIVE_FIELDS = Set.of(
+    private static final Set<String> DEFAULT_SENSITIVE_FIELDS = new HashSet<>(Arrays.asList(
             "password", "oldPassword", "newPassword", "confirmPassword"
-    );
+    ));
 
     private static final String MASK = "******";
 
@@ -26,7 +26,7 @@ public class SensitiveDataUtil {
      * 对 JSON 字符串中的敏感字段进行掩码
      */
     public static String maskJson(String json, ObjectMapper objectMapper, String... extraFields) {
-        if (json == null || json.isBlank()) {
+        if (json == null || json.trim().isEmpty()) {
             return json;
         }
         try {

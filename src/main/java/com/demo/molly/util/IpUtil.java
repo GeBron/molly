@@ -1,6 +1,6 @@
 package com.demo.molly.util;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * IP 地址工具类

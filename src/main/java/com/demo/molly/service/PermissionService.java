@@ -102,7 +102,7 @@ public class PermissionService {
     private List<PermissionVO> buildTree(List<Permission> permissions) {
         List<Permission> sorted = permissions.stream()
                 .sorted(Comparator.comparingInt(p -> p.getSort() == null ? 0 : p.getSort()))
-                .toList();
+                .collect(Collectors.toList());
         Map<Long, PermissionVO> map = sorted.stream()
                 .collect(Collectors.toMap(Permission::getId, p -> toVO(p, new ArrayList<>())));
 

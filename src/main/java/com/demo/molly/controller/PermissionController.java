@@ -5,7 +5,7 @@ import com.demo.molly.common.Result;
 import com.demo.molly.dto.PermissionDTO;
 import com.demo.molly.service.PermissionService;
 import com.demo.molly.vo.PermissionVO;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;

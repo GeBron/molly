@@ -8,7 +8,7 @@ import com.demo.molly.dto.RoleDTO;
 import com.demo.molly.dto.RoleQueryDTO;
 import com.demo.molly.service.RoleService;
 import com.demo.molly.vo.RoleVO;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,7 +20,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -39,9 +39,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/login.html", "/static/**", "/favicon.svg", "/error").permitAll()
-                .requestMatchers("/api/auth/login").permitAll()
+            .authorizeRequests(auth -> auth
+                .antMatchers("/", "/index.html", "/login.html", "/static/**", "/favicon.svg", "/error").permitAll()
+                .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

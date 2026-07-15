@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 加载用户信息
@@ -50,13 +51,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         if (roles == null || permissions == null) {
             List<Role> roleList = roleMapper.selectByUserId(user.getId());
-            roles = roleList.stream().map(Role::getRoleCode).toList();
-            List<Long> roleIds = roleList.stream().map(Role::getId).toList();
+            roles = roleList.stream().map(Role::getRoleCode).collect(Collectors.toList());
+            List<Long> roleIds = roleList.stream().map(Role::getId).collect(Collectors.toList());
 
             permissions = new ArrayList<>();
             if (!roleIds.isEmpty()) {
                 List<Permission> perms = permissionMapper.selectByRoleIds(roleIds);
-                permissions = perms.stream().map(Permission::getPermCode).distinct().toList();
+                permissions = perms.stream().map(Permission::getPermCode).distinct().collect(Collectors.toList());
             }
 
             tokenCacheService.cacheUserRoles(user.getId(), roles);
