@@ -29,6 +29,7 @@ Molly 后台管理系统（前后端分离）
 - JWT（jjwt 0.12.6）
 - MyBatis Spring Boot Starter 3.0.4
 - MySQL Connector/J
+- Flyway
 
 ### 前端
 
@@ -53,7 +54,7 @@ Molly 后台管理系统（前后端分离）
 - **审计字段**：所有业务表统一使用 `created_by`、`updated_by`、`created_at`、`updated_at`、`deleted`
 - **逻辑删除**：统一使用 `deleted` 字段进行软删除
 - **动态菜单路由**：前端根据 `/api/auth/info` 返回的菜单动态生成路由
-- **初始化数据**：`schema.sql` + `data.sql` 自动建表并初始化超级管理员账号
+- **初始化数据**：Flyway 版本化迁移脚本自动建表并初始化超级管理员账号（`dev` / `prod` 统一使用）
 
 ## 环境要求
 
@@ -74,7 +75,11 @@ cd molly
 
 ### 2. 配置环境变量
 
-连接信息以环境变量方式注入，`src/main/resources/application.properties` 中已引用这些变量，无需手动修改配置文件。
+连接信息以环境变量方式注入，`src/main/resources/application.yml` 中已引用这些变量，无需手动修改配置文件。项目已按 `dev` / `prod` 拆分配置：
+
+- `application.yml`：公共配置，默认激活 `dev` 环境
+- `application-dev.yml`：开发环境配置
+- `application-prod.yml`：生产环境配置
 
 启动前在系统中设置环境变量：
 
@@ -89,13 +94,15 @@ export REDIS_PASSWORD=
 export REDIS_DB=0
 ```
 
-对应的数据源配置如下：
+对应的数据源配置如下（以 `application-dev.yml` 为例）：
 
-```properties
-spring.datasource.url=jdbc:mysql://${TiDB_USERNAME}:${TiDB_PASSWORD}@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/molly?sslMode=VERIFY_IDENTITY
-spring.datasource.username=${TiDB_USERNAME}
-spring.datasource.password=${TiDB_PASSWORD}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://${TiDB_USERNAME}:${TiDB_PASSWORD}@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/molly?sslMode=VERIFY_IDENTITY
+    username: ${TiDB_USERNAME}
+    password: ${TiDB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 ```
 
 > 请在 TiDB Cloud 控制台创建集群与数据库 `molly`，并确保当前网络可访问 `gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000`（TiDB Cloud 默认要求 TLS 加密连接）。
@@ -106,14 +113,28 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 mvn spring-boot:run
 ```
 
-应用启动后默认监听 `8080` 端口，启动时会自动执行 `schema.sql` 与 `data.sql` 初始化表结构和基础数据。
+应用启动后默认监听 `8080` 端口，启动时会自动执行 Flyway 迁移脚本（`db/migration/V1__init_schema.sql`、`V2__init_data.sql`）初始化表结构和基础数据。迁移脚本仅首次执行，后续启动会跳过已执行的版本。
 
 默认超级管理员账号：
 
 - 用户名：`admin`
 - 密码：`admin123`
 
-### 4. 启动前端
+### 4. 切换环境（可选）
+
+本地开发默认使用 `dev` 环境，生产环境启动时显式指定 `prod`：
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+或直接运行 jar：
+
+```bash
+java -jar target/molly-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+### 5. 启动前端
 
 ```bash
 cd molly-admin
@@ -176,7 +197,7 @@ mvn clean package -DskipTests
 java -jar target/molly-0.0.1-SNAPSHOT.jar
 ```
 
-生产环境建议通过环境变量或外部配置中心注入数据库账号、Redis 密码、JWT 密钥等敏感信息，避免硬编码在配置文件中。
+生产环境建议通过环境变量或外部配置中心注入数据库账号、Redis 密码、JWT 密钥等敏感信息，避免硬编码在配置文件中。生产环境已配置 `spring.flyway.clean-disabled=true`，防止误执行 Flyway `clean` 清除数据。
 
 ### 前端部署
 
@@ -224,9 +245,12 @@ molly
     │   │   └── MollyApplication.java
     │   └── resources/
     │       ├── mapper/         # MyBatis XML
-    │       ├── application.properties
-    │       ├── schema.sql      # 建表语句
-    │       └── data.sql        # 初始化数据
+    │       ├── application.yml              # 公共配置
+    │       ├── application-dev.yml          # 开发环境配置
+    │       ├── application-prod.yml         # 生产环境配置
+    │       └── db/migration/                # Flyway 迁移脚本
+    │           ├── V1__init_schema.sql      # 建表语句
+    │           └── V2__init_data.sql        # 初始化数据
     └── test/
         └── java/com/demo/molly/
 ```
