@@ -40,7 +40,7 @@ public class OperationLogAspect {
     }
 
     @Around("@annotation(operationLog)")
-    public Object around(ProceedingJoinPoint point, OperationLog operationLog) throws Throwable {
+    public Object around(ProceedingJoinPoint point, com.demo.molly.aspect.OperationLog operationLog) throws Throwable {
         long start = System.currentTimeMillis();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes != null ? attributes.getRequest() : null;
@@ -59,7 +59,7 @@ public class OperationLogAspect {
         }
     }
 
-    private void saveLog(ProceedingJoinPoint point, OperationLog operationLog, HttpServletRequest request,
+    private void saveLog(ProceedingJoinPoint point, com.demo.molly.aspect.OperationLog operationLog, HttpServletRequest request,
                          Object result, Throwable throwable, long duration) {
         OperationLog log = new OperationLog();
         LoginUser loginUser = SecurityUtil.getCurrentUser();
@@ -94,7 +94,7 @@ public class OperationLogAspect {
         asyncLogService.saveOperationLog(log);
     }
 
-    private String serializeParams(Object[] args, OperationLog operationLog) {
+    private String serializeParams(Object[] args, com.demo.molly.aspect.OperationLog operationLog) {
         Object[] filtered = Arrays.stream(args)
                 .filter(arg -> !(arg instanceof HttpServletRequest)
                         && !(arg instanceof HttpServletResponse)
