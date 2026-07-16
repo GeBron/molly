@@ -100,7 +100,9 @@ function ajaxRequest(options) {
     xhrFields: { withCredentials: true }
   }, options);
 
-  if (settings.data && settings.contentType === 'application/json' && typeof settings.data !== 'string') {
+  if (settings.type === 'GET') {
+    delete settings.contentType;
+  } else if (settings.data && settings.contentType === 'application/json' && typeof settings.data !== 'string') {
     settings.data = JSON.stringify(settings.data);
   }
 
