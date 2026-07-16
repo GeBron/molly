@@ -40,7 +40,7 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeRequests(auth -> auth
-                .antMatchers("/", "/index.html", "/login.html", "/static/**", "/favicon.svg", "/error").permitAll()
+                .antMatchers("/", "/index.html", "/login.html", "/css/**", "/js/**", "/images/**", "/favicon.svg", "/error").permitAll()
                 .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()
             )
