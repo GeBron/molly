@@ -5,6 +5,15 @@ spring:
     password: ${TiDB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  redis:
+    host: mature-ox-119917.upstash.io
+    port: 6379
+    username: ${REDIS_USERNAME}
+    password: ${REDIS_PASSWORD}
+    ssl: true
+    timeout: 10s
+    database: 0
+
   flyway:
     enabled: true
 
