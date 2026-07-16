@@ -18,6 +18,8 @@ import com.demo.molly.vo.MenuVO;
 import com.demo.molly.vo.UserInfoVO;
 import com.demo.molly.vo.UserVO;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -40,6 +42,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+    private static final int MAX_LOG_MESSAGE_LENGTH = 255;
 
     private final AuthenticationManager authenticationManager;
     private final UserDetailsServiceImpl userDetailsService;
@@ -166,17 +172,24 @@ public class AuthService {
     }
 
     private void saveLoginLog(Long userId, String username, String operation, String status, String message, HttpServletRequest request) {
-        LoginLog log = new LoginLog();
-        log.setUserId(userId);
-        log.setUsername(username);
-        log.setOperation(operation);
-        log.setStatus(status);
-        log.setMessage(message);
-        log.setIp(IpUtil.getIp(request));
-        Long operatorId = userId != null ? userId : 0L;
-        log.setCreatedBy(operatorId);
-        log.setUpdatedBy(operatorId);
-        loginLogMapper.insert(log);
+        try {
+            LoginLog log = new LoginLog();
+            log.setUserId(userId);
+            log.setUsername(username);
+            log.setOperation(operation);
+            log.setStatus(status);
+            if (message != null && message.length() > MAX_LOG_MESSAGE_LENGTH) {
+                message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
+            }
+            log.setMessage(message);
+            log.setIp(IpUtil.getIp(request));
+            Long operatorId = userId != null ? userId : 0L;
+            log.setCreatedBy(operatorId);
+            log.setUpdatedBy(operatorId);
+            loginLogMapper.insert(log);
+        } catch (Exception e) {
+            logger.error("保存登录日志失败", e);
+        }
     }
 
     private List<MenuVO> buildMenus(List<Long> roleIds) {

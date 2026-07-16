@@ -77,7 +77,7 @@
     </select>
 
     <select id="selectByRoleIds" resultMap="PermissionResult">
-        SELECT DISTINCT p.<include refid="permissionColumns"/>
+        SELECT DISTINCT p.id, p.perm_code, p.perm_name, p.type, p.parent_id, p.path, p.sort, p.status, p.deleted, p.created_at, p.updated_at, p.created_by, p.updated_by
         FROM sys_permission p
         INNER JOIN sys_role_permission rp ON p.id = rp.permission_id
         WHERE rp.role_id IN
