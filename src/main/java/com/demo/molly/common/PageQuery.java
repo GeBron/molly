@@ -23,12 +23,4 @@ public class PageQuery {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
-
-    public int offset() {
-        return (Math.max(pageNum, 1) - 1) * Math.max(pageSize, 1);
-    }
-
-    public int limit() {
-        return Math.max(pageSize, 1);
-    }
 }

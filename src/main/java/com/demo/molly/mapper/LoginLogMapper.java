@@ -16,9 +16,5 @@ public interface LoginLogMapper {
     int insert(LoginLog log);
 
     List<LoginLog> selectList(@Param("startTime") LocalDateTime startTime,
-                              @Param("endTime") LocalDateTime endTime,
-                              @Param("offset") int offset,
-                              @Param("limit") int limit);
-
-    long count(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+                              @Param("endTime") LocalDateTime endTime);
 }

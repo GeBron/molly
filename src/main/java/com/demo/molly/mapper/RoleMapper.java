@@ -25,11 +25,7 @@ public interface RoleMapper {
     int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted, @Param("updatedBy") Long updatedBy);
 
     List<Role> selectList(@Param("roleName") String roleName,
-                          @Param("status") Integer status,
-                          @Param("offset") int offset,
-                          @Param("limit") int limit);
-
-    long count(@Param("roleName") String roleName, @Param("status") Integer status);
+                          @Param("status") Integer status);
 
     List<Role> selectByUserId(Long userId);
 
