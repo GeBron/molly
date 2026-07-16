@@ -4,36 +4,40 @@
 
 ```mermaid
 graph LR
-    A["浏览器"] -->|HTTP / HTTPS| B["molly 后端 Spring Boot"]
+    A["浏览器"] -->|HTTP / HTTPS| B["molly 后端 Spring Boot 2.7"]
     B --> C["Spring Security"]
     C --> D["Controller"]
     D --> E["Service"]
     E --> F["MyBatis Mapper"]
     F --> G["TiDB Cloud MySQL"]
-    D --> H["操作日志 AOP"]
-    D --> I["登录日志"]
+    D --> H["Thymeleaf 模板"]
+    E --> I["Redis 缓存"]
+    D --> J["操作日志 AOP"]
+    J --> K["AsyncLogService 异步写入"]
+    D --> L["登录日志"]
 ```
 
 ## 2. 技术说明
 
-- **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），静态页面位于 `src/main/resources/static/`，由 Spring Boot 直接托管
-- **后端**：Spring Boot 4.1.0 + Spring Security + MyBatis + MySQL/TiDB
-- **认证**：Spring Security Session/Cookie 登录
+- **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），Thymeleaf 模板位于 `src/main/resources/templates/`，由 Spring Boot 直接渲染并托管静态资源
+- **后端**：Spring Boot 2.7.18 + Spring Security + MyBatis + MySQL/TiDB
+- **认证**：Spring Security Session/Cookie 登录，Session 有效期 30 分钟
+- **缓存**：Spring Data Redis（默认 Upstash Redis，SSL 连接），缓存用户角色与权限
 - **权限模型**：RBAC，用户 -> 角色 -> 权限
 - **数据库**：TiDB Cloud MySQL 兼容实例
-- **部署**：Spring Boot 内置容器直接运行，静态资源由后端托管
+- **部署**：Spring Boot 内置容器直接运行，页面由后端渲染
 
 ## 3. 页面路径
 
 | 页面 | 路径 |
 |---|---|
-| 登录页 | `/login.html` |
-| 首页 Dashboard | `/dashboard.html` |
-| 用户管理 | `/users.html` |
-| 角色管理 | `/roles.html` |
-| 权限管理 | `/permissions.html` |
-| 登录日志 | `/login-logs.html` |
-| 操作日志 | `/operation-logs.html` |
+| 登录页 | `/login` |
+| 首页 Dashboard | `/` 或 `/dashboard` |
+| 用户管理 | `/users` |
+| 角色管理 | `/roles` |
+| 权限管理 | `/permissions` |
+| 登录日志 | `/login-logs` |
+| 操作日志 | `/operation-logs` |
 
 ## 4. API 定义
 
@@ -48,12 +52,16 @@ interface LoginRequest {
 interface LoginResponse {
   code: number
   message: string
+  data: UserInfo
 }
 
 interface UserInfo {
-  id: number
-  username: string
-  realName: string
+  user: {
+    id: number
+    username: string
+    realName: string
+    status: number
+  }
   roles: string[]
   permissions: string[]
   menus: Menu[]
@@ -64,6 +72,7 @@ interface Menu {
   name: string
   path: string
   type: number // 1 目录 2 菜单
+  permCode: string
   children?: Menu[]
 }
 ```
@@ -95,13 +104,17 @@ graph TD
     G["PermissionController"] --> H["PermissionService"]
     I["LogController"] --> J["LogService"]
     B --> K["UserDetailsServiceImpl"]
-    D --> L["UserMapper"]
-    F --> M["RoleMapper"]
-    H --> N["PermissionMapper"]
-    J --> O["LoginLogMapper / OperationLogMapper"]
-    K --> L
-    K --> M
+    K --> L["TokenCacheService"]
+    L --> M["Redis"]
+    D --> N["UserMapper"]
+    F --> O["RoleMapper"]
+    H --> P["PermissionMapper"]
+    J --> Q["LoginLogMapper / OperationLogMapper"]
     K --> N
+    K --> O
+    K --> P
+    R["OperationLogAspect"] --> S["AsyncLogService"]
+    S --> Q
 ```
 
 ## 6. 数据模型
@@ -128,6 +141,8 @@ erDiagram
         datetime lock_time
         datetime created_at
         datetime updated_at
+        bigint created_by
+        bigint updated_by
     }
 
     sys_role {
@@ -138,6 +153,8 @@ erDiagram
         tinyint deleted
         datetime created_at
         datetime updated_at
+        bigint created_by
+        bigint updated_by
     }
 
     sys_permission {
@@ -152,16 +169,30 @@ erDiagram
         tinyint deleted
         datetime created_at
         datetime updated_at
+        bigint created_by
+        bigint updated_by
     }
 
     sys_user_role {
+        bigint id PK
         bigint user_id FK
         bigint role_id FK
+        datetime created_at
+        datetime updated_at
+        bigint created_by
+        bigint updated_by
+        tinyint deleted
     }
 
     sys_role_permission {
+        bigint id PK
         bigint role_id FK
         bigint permission_id FK
+        datetime created_at
+        datetime updated_at
+        bigint created_by
+        bigint updated_by
+        tinyint deleted
     }
 
     sys_login_log {
@@ -173,6 +204,10 @@ erDiagram
         varchar status
         varchar message
         datetime created_at
+        datetime updated_at
+        bigint created_by
+        bigint updated_by
+        tinyint deleted
     }
 
     sys_operation_log {
@@ -186,9 +221,14 @@ erDiagram
         varchar method
         text params
         text result
-        long duration
+        bigint duration
         varchar ip
+        tinyint status
         datetime created_at
+        datetime updated_at
+        bigint created_by
+        bigint updated_by
+        tinyint deleted
     }
 ```
 
@@ -196,3 +236,21 @@ erDiagram
 
 建表语句与初始化数据由项目根目录下的 `sql/init_schema.sql` 与 `sql/init_data.sql` 提供，需要手动导入数据库。
 
+### 6.3 关键字段说明
+
+- `status`：启用/禁用状态，`1` 启用，`0` 禁用。
+- `deleted`：逻辑删除标志，`0` 正常，`1` 已删除。
+- `login_fail_count` / `lock_time`：连续登录失败次数与锁定时间，失败 5 次后锁定 30 分钟。
+- `type`（sys_permission）：`1` 目录、`2` 菜单、`3` 按钮、`4` 接口。
+
+## 7. 认证与授权
+
+- 登录接口为 `POST /api/auth/login`，成功后建立 Spring Security Session，Cookie 名称为 `SESSION`，启用 `HttpOnly` 与 `SameSite=Strict`。
+- 登出时清除 SecurityContext 并清空 Redis 中的用户角色/权限缓存。
+- 用户角色与权限在登录时加载并缓存到 Redis；权限编码存储为 `system:user:view` 等形式，实际鉴权时会转换为 `user:view`、`loginLog:view`、`operationLog:view` 等 Authority。
+- 页面访问通过 `@PreAuthorize("hasAuthority('xxx:view')")` 控制，接口操作通过对应 Authority 控制。
+
+## 8. 日志
+
+- **登录日志**：在 `AuthService` 中同步写入，记录登录/登出、成功/失败、IP、消息等信息。
+- **操作日志**：通过 `OperationLogAspect` 拦截带 `@OperationLog` 注解的方法，调用 `AsyncLogService` 异步写入 `sys_operation_log`，避免影响主业务响应时间。
