@@ -1,13 +1,36 @@
 const API_BASE = '/api';
 
 let currentUserInfo = null;
+const USER_INFO_KEY = 'molly_user_info';
 
 function getUserInfo() {
-  return currentUserInfo;
+  if (currentUserInfo) {
+    return currentUserInfo;
+  }
+  try {
+    const cached = sessionStorage.getItem(USER_INFO_KEY);
+    return cached ? JSON.parse(cached) : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function setUserInfo(info) {
   currentUserInfo = info;
+  try {
+    if (info) {
+      sessionStorage.setItem(USER_INFO_KEY, JSON.stringify(info));
+    } else {
+      sessionStorage.removeItem(USER_INFO_KEY);
+    }
+  } catch (e) {}
+}
+
+function clearUserInfo() {
+  currentUserInfo = null;
+  try {
+    sessionStorage.removeItem(USER_INFO_KEY);
+  } catch (e) {}
 }
 
 function hasPermission(perm) {
@@ -118,7 +141,7 @@ function ajaxRequest(options) {
       if (xhr.status === 401) {
         showToast('登录已过期，请重新登录', 'error');
         setTimeout(function () {
-          window.location.href = '/login.html';
+          window.location.href = '/login';
         }, 1500);
         return;
       }
@@ -137,6 +160,6 @@ function initPage() {
 
 $(document).ajaxError(function (event, xhr) {
   if (xhr.status === 401) {
-    window.location.href = '/login.html';
+    window.location.href = '/login';
   }
 });

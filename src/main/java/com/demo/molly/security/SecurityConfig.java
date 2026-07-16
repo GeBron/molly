@@ -15,6 +15,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Spring Security 配置
  */
@@ -40,7 +42,7 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeRequests(auth -> auth
-                .antMatchers("/", "/index.html", "/login.html", "/css/**", "/js/**", "/images/**", "/favicon.svg", "/error").permitAll()
+                .antMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.svg", "/error").permitAll()
                 .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()
             )
@@ -54,10 +56,23 @@ public class SecurityConfig {
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(401);
-            response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\",\"data\":null}");
+            if (isAjaxRequest(request)) {
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(401);
+                response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\",\"data\":null}");
+            } else {
+                response.sendRedirect("/login");
+            }
         };
+    }
+
+    private boolean isAjaxRequest(HttpServletRequest request) {
+        String requestedWith = request.getHeader("X-Requested-With");
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            return true;
+        }
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/api/");
     }
 
     @Bean
