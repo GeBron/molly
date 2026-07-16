@@ -9,10 +9,12 @@ function checkLogin(callback) {
         callback(res.data);
       }
     } else {
-      window.location.href = '/login.html';
+      clearUserInfo();
+      window.location.href = '/login';
     }
   }).fail(function () {
-    window.location.href = '/login.html';
+    clearUserInfo();
+    window.location.href = '/login';
   });
 }
 
@@ -21,7 +23,8 @@ function logout() {
     path: '/auth/logout',
     type: 'POST'
   }).always(function () {
-    window.location.href = '/login.html';
+    clearUserInfo();
+    window.location.href = '/login';
   });
 }
 
@@ -46,7 +49,7 @@ $(function () {
         if (res && res.code === 200 && res.data) {
           showToast('登录成功', 'success');
           setTimeout(function () {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/dashboard';
           }, 500);
         }
       }).always(function () {

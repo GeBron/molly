@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head(~{::title}, ~{::link})">
+  <title>仪表盘 - Molly Admin</title>
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body th:replace="layout :: body(~{::.content}, ~{::script})">
+  <div class="content">
+    <div class="row g-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">欢迎使用 Molly Admin</h5>
+            <p class="card-text text-muted mb-1">当前用户：<span id="info-username"></span></p>
+            <p class="card-text text-muted">角色：<span id="info-roles"></span></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-primary">RBAC</div>
+            <div class="text-muted mt-2">基于角色的权限控制</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-success">Session</div>
+            <div class="text-muted mt-2">传统 Session 认证</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-info">AOP</div>
+            <div class="text-muted mt-2">登录与操作日志记录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(function () {
+      checkLogin(function (info) {
+        $('#info-username').text(info.user.username);
+        $('#info-roles').text(info.roles && info.roles.length > 0 ? info.roles.join(', ') : '-');
+      });
+    });
+  </script>
+</body>
+</html>
