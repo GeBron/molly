@@ -5,10 +5,6 @@ spring:
     password: ${TiDB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-  flyway:
-    enabled: true
-    clean-disabled: true
-
 logging:
   level:
     com.demo.molly: info

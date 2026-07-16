@@ -194,5 +194,5 @@ erDiagram
 
 ### 6.2 数据定义
 
-建表语句与初始化数据由 Flyway 迁移脚本 `src/main/resources/db/migration/V1__init_schema.sql` 与 `V2__init_data.sql` 提供。
+建表语句与初始化数据由项目根目录下的 `sql/init_schema.sql` 与 `sql/init_data.sql` 提供，需要手动导入数据库。
 

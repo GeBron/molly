@@ -14,9 +14,6 @@ spring:
     timeout: 10s
     database: 0
 
-  flyway:
-    enabled: true
-
 logging:
   level:
     com.demo.molly: debug
