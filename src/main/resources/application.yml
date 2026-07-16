@@ -6,10 +6,13 @@ spring:
     active: dev
 
   redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
-    database: ${REDIS_DB:0}
+    host: mature-ox-119917.upstash.io
+    port: 6379
+    username: ${REDIS_USERNAME}
+    password: ${REDIS_PASSWORD}
+    ssl: true
+    timeout: 10s
+    database: 0
 
   flyway:
     enabled: true
