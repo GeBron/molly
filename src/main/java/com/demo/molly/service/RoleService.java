@@ -4,6 +4,8 @@ import com.demo.molly.common.PageResult;
 import com.demo.molly.dto.AssignPermissionDTO;
 import com.demo.molly.dto.RoleDTO;
 import com.demo.molly.dto.RoleQueryDTO;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.demo.molly.entity.Role;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.mapper.RoleMapper;
@@ -30,15 +32,12 @@ public class RoleService {
     }
 
     public PageResult<RoleVO> list(RoleQueryDTO query) {
-        int pageNum = query.pageNum() == null ? 1 : query.pageNum();
-        int pageSize = query.pageSize() == null ? 10 : query.pageSize();
-        int offset = (pageNum - 1) * pageSize;
+        PageHelper.startPage(query.getPageNum(), query.getPageSize());
+        List<Role> roles = roleMapper.selectList(query.roleName(), query.status());
+        PageInfo<Role> pageInfo = new PageInfo<>(roles);
 
-        List<Role> roles = roleMapper.selectList(query.roleName(), query.status(), offset, pageSize);
-        long total = roleMapper.count(query.roleName(), query.status());
-
-        List<RoleVO> list = roles.stream().map(this::toVO).collect(Collectors.toList());
-        return new PageResult<>(list, total, pageNum, pageSize);
+        List<RoleVO> list = pageInfo.getList().stream().map(this::toVO).collect(Collectors.toList());
+        return new PageResult<>(list, pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize());
     }
 
     public RoleVO detail(Long id) {

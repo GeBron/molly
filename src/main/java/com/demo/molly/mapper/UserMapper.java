@@ -33,11 +33,7 @@ public interface UserMapper {
     int resetLoginFail(@Param("id") Long id, @Param("updatedBy") Long updatedBy);
 
     List<User> selectList(@Param("username") String username,
-                          @Param("status") Integer status,
-                          @Param("offset") int offset,
-                          @Param("limit") int limit);
-
-    long count(@Param("username") String username, @Param("status") Integer status);
+                          @Param("status") Integer status);
 
     List<Long> selectRoleIdsByUserId(Long userId);
 

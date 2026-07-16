@@ -41,20 +41,5 @@
             </if>
         </where>
         ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <select id="count" resultType="long">
-        SELECT COUNT(*)
-        FROM sys_operation_log
-        <where>
-            deleted = 0
-            <if test="startTime != null">
-                AND created_at &gt;= #{startTime}
-            </if>
-            <if test="endTime != null">
-                AND created_at &lt;= #{endTime}
-            </if>
-        </where>
     </select>
 </mapper>

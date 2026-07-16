@@ -1,14 +1,14 @@
 package com.demo.molly.dto;
 
+import com.demo.molly.common.PageQuery;
+
 /**
  * 角色查询参数
  */
-public class RoleQueryDTO {
+public class RoleQueryDTO extends PageQuery {
 
     private String roleName;
     private Integer status;
-    private Integer pageNum;
-    private Integer pageSize;
 
     public RoleQueryDTO() {
     }
@@ -16,8 +16,8 @@ public class RoleQueryDTO {
     public RoleQueryDTO(String roleName, Integer status, Integer pageNum, Integer pageSize) {
         this.roleName = roleName;
         this.status = status;
-        this.pageNum = pageNum;
-        this.pageSize = pageSize;
+        setPageNum(pageNum);
+        setPageSize(pageSize);
     }
 
     public String roleName() {
@@ -42,29 +42,5 @@ public class RoleQueryDTO {
 
     public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public Integer pageNum() {
-        return pageNum;
-    }
-
-    public Integer getPageNum() {
-        return pageNum;
-    }
-
-    public void setPageNum(Integer pageNum) {
-        this.pageNum = pageNum;
-    }
-
-    public Integer pageSize() {
-        return pageSize;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
     }
 }

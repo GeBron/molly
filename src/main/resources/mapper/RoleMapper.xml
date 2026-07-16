@@ -74,21 +74,6 @@
             </if>
         </where>
         ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <select id="count" resultType="long">
-        SELECT COUNT(*)
-        FROM sys_role
-        <where>
-            deleted = 0
-            <if test="roleName != null and roleName != ''">
-                AND role_name LIKE CONCAT('%', #{roleName}, '%')
-            </if>
-            <if test="status != null">
-                AND status = #{status}
-            </if>
-        </where>
     </select>
 
     <select id="selectByUserId" resultMap="RoleResult">

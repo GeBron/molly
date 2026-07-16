@@ -16,9 +16,5 @@ public interface OperationLogMapper {
     int insert(OperationLog log);
 
     List<OperationLog> selectList(@Param("startTime") LocalDateTime startTime,
-                                  @Param("endTime") LocalDateTime endTime,
-                                  @Param("offset") int offset,
-                                  @Param("limit") int limit);
-
-    long count(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+                                  @Param("endTime") LocalDateTime endTime);
 }

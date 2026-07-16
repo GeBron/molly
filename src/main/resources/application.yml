@@ -31,5 +31,10 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+
 session:
   cache-timeout: 1800
