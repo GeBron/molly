@@ -5,6 +5,7 @@ import com.demo.molly.dto.AssignRoleDTO;
 import com.demo.molly.dto.UpdateUserDTO;
 import com.demo.molly.dto.UserDTO;
 import com.demo.molly.dto.UserQueryDTO;
+import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.demo.molly.entity.Role;
@@ -18,9 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户服务
@@ -41,9 +42,17 @@ public class UserService {
 
     public PageResult<UserVO> list(UserQueryDTO query) {
         PageInfo<User> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
-                .doSelectPageInfo(() -> userMapper.selectList(query.username(), query.status()));
+                .doSelectPageInfo(new ISelect() {
+                    @Override
+                    public void doSelect() {
+                        userMapper.selectList(query.username(), query.status());
+                    }
+                });
 
-        List<UserVO> list = pageInfo.getList().stream().map(this::toVO).collect(Collectors.toList());
+        List<UserVO> list = new ArrayList<>();
+        for (User user : pageInfo.getList()) {
+            list.add(toVO(user));
+        }
         return new PageResult<>(list, pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize());
     }
 
@@ -124,10 +133,14 @@ public class UserService {
 
     private UserVO toVO(User user) {
         List<Role> roles = user.getRoles();
-        List<Long> roleIds = roles == null ? Collections.emptyList()
-                : roles.stream().map(Role::getId).collect(Collectors.toList());
-        List<String> roleNames = roles == null ? Collections.emptyList()
-                : roles.stream().map(Role::getRoleName).collect(Collectors.toList());
+        List<Long> roleIds = new ArrayList<>();
+        List<String> roleNames = new ArrayList<>();
+        if (roles != null) {
+            for (Role role : roles) {
+                roleIds.add(role.getId());
+                roleNames.add(role.getRoleName());
+            }
+        }
         return new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), roleIds, roleNames);
     }
 }

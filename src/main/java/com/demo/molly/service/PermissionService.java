@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 权限服务
@@ -100,11 +101,19 @@ public class PermissionService {
     }
 
     private List<PermissionVO> buildTree(List<Permission> permissions) {
-        List<Permission> sorted = permissions.stream()
-                .sorted(Comparator.comparingInt(p -> p.getSort() == null ? 0 : p.getSort()))
-                .collect(Collectors.toList());
-        Map<Long, PermissionVO> map = sorted.stream()
-                .collect(Collectors.toMap(Permission::getId, p -> toVO(p, new ArrayList<>())));
+        List<Permission> sorted = new ArrayList<>(permissions);
+        Collections.sort(sorted, new Comparator<Permission>() {
+            @Override
+            public int compare(Permission o1, Permission o2) {
+                Integer s1 = o1.getSort() == null ? 0 : o1.getSort();
+                Integer s2 = o2.getSort() == null ? 0 : o2.getSort();
+                return s1.compareTo(s2);
+            }
+        });
+        Map<Long, PermissionVO> map = new HashMap<>();
+        for (Permission p : sorted) {
+            map.put(p.getId(), toVO(p, new ArrayList<>()));
+        }
 
         List<PermissionVO> roots = new ArrayList<>();
         for (Permission p : sorted) {

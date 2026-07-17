@@ -32,10 +32,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 认证服务
@@ -122,8 +123,12 @@ public class AuthService {
         UserVO userVO = new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), null, null);
 
         List<Role> roles = roleMapper.selectByUserId(user.getId());
-        List<String> roleCodes = roles.stream().map(Role::getRoleCode).collect(Collectors.toList());
-        List<Long> roleIds = roles.stream().map(Role::getId).collect(Collectors.toList());
+        List<String> roleCodes = new ArrayList<>();
+        List<Long> roleIds = new ArrayList<>();
+        for (Role role : roles) {
+            roleCodes.add(role.getRoleCode());
+            roleIds.add(role.getId());
+        }
 
         List<String> permissions = loginUser.getPermissions();
         List<MenuVO> menus = buildMenus(roleIds);
@@ -185,13 +190,25 @@ public class AuthService {
             return new ArrayList<>();
         }
         List<Permission> permissions = permissionMapper.selectByRoleIds(roleIds);
-        List<Permission> menuPermissions = permissions.stream()
-                .filter(p -> p.getType() == 1 || p.getType() == 2)
-                .sorted(Comparator.comparingInt(p -> p.getSort() == null ? 0 : p.getSort()))
-                .collect(Collectors.toList());
+        List<Permission> menuPermissions = new ArrayList<>();
+        for (Permission p : permissions) {
+            if (p.getType() == 1 || p.getType() == 2) {
+                menuPermissions.add(p);
+            }
+        }
+        Collections.sort(menuPermissions, new Comparator<Permission>() {
+            @Override
+            public int compare(Permission o1, Permission o2) {
+                Integer s1 = o1.getSort() == null ? 0 : o1.getSort();
+                Integer s2 = o2.getSort() == null ? 0 : o2.getSort();
+                return s1.compareTo(s2);
+            }
+        });
 
-        Map<Long, MenuVO> map = menuPermissions.stream()
-                .collect(Collectors.toMap(Permission::getId, p -> new MenuVO(p.getId(), p.getPermName(), p.getPath(), p.getType(), p.getPermCode(), null, new ArrayList<>())));
+        Map<Long, MenuVO> map = new HashMap<>();
+        for (Permission p : menuPermissions) {
+            map.put(p.getId(), new MenuVO(p.getId(), p.getPermName(), p.getPath(), p.getType(), p.getPermCode(), null, new ArrayList<>()));
+        }
 
         List<MenuVO> roots = new ArrayList<>();
         for (Permission p : menuPermissions) {

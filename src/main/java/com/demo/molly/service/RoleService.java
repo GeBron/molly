@@ -4,6 +4,7 @@ import com.demo.molly.common.PageResult;
 import com.demo.molly.dto.AssignPermissionDTO;
 import com.demo.molly.dto.RoleDTO;
 import com.demo.molly.dto.RoleQueryDTO;
+import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.demo.molly.entity.Role;
@@ -16,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 角色服务
@@ -38,9 +39,17 @@ public class RoleService {
 
     public PageResult<RoleVO> list(RoleQueryDTO query) {
         PageInfo<Role> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
-                .doSelectPageInfo(() -> roleMapper.selectList(query.roleName(), query.status()));
+                .doSelectPageInfo(new ISelect() {
+                    @Override
+                    public void doSelect() {
+                        roleMapper.selectList(query.roleName(), query.status());
+                    }
+                });
 
-        List<RoleVO> list = pageInfo.getList().stream().map(this::toVO).collect(Collectors.toList());
+        List<RoleVO> list = new ArrayList<>();
+        for (Role role : pageInfo.getList()) {
+            list.add(toVO(role));
+        }
         return new PageResult<>(list, pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize());
     }
 
