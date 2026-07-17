@@ -1,6 +1,7 @@
 package com.demo.molly.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 用户实体
@@ -13,6 +14,7 @@ public class User extends BaseEntity {
     private Integer status;
     private Integer loginFailCount;
     private LocalDateTime lockTime;
+    private List<Role> roles;
 
     public String getUsername() {
         return username;
@@ -60,5 +62,13 @@ public class User extends BaseEntity {
 
     public void setLockTime(LocalDateTime lockTime) {
         this.lockTime = lockTime;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 }

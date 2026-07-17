@@ -39,6 +39,7 @@
         <table class="table table-bordered table-striped" id="role-table" style="width:100%">
           <thead>
             <tr>
+              <th style="display:none;">ID</th>
               <th>角色编码</th>
               <th>角色名称</th>
               <th>状态</th>
@@ -46,6 +47,21 @@
               <th>操作</th>
             </tr>
           </thead>
+          <tbody>
+            <tr th:each="role : ${initialData.list}">
+              <td style="display:none;" th:text="${role.id}">ID</td>
+              <td th:text="${role.roleCode}">角色编码</td>
+              <td th:text="${role.roleName}">角色名称</td>
+              <td th:text="${role.status}">1</td>
+              <td th:text="${@templateHelper.formatDateTime(role.createdAt)}">创建时间</td>
+              <td>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="role:update" th:data-id="${role.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="role:update" th:data-id="${role.id}" th:data-status="${role.status}" th:text="${role.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-outline-info me-1 btn-perms" data-perm="role:assign-perm" th:data-id="${role.id}">分配权限</button>
+                <button class="btn btn-sm btn-danger btn-delete" data-perm="role:delete" th:data-id="${role.id}">删除</button>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
   </div>
@@ -115,7 +131,7 @@
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
-  <script>
+  <script th:inline="javascript">
     let roleTable;
     let currentRoleId = null;
     let permissionTree = [];
@@ -143,6 +159,7 @@
       roleTable = $('#role-table').DataTable({
         processing: true,
         serverSide: true,
+        deferLoading: [[${initialData.total}]],
         searching: false,
         ordering: false,
         pageLength: 10,
@@ -169,12 +186,13 @@
           });
         },
         columns: [
-          { data: 'roleCode' },
-          { data: 'roleName' },
+          { data: 'id', visible: false },
+          { data: 'roleCode', render: function (data) { return escapeHtml(data); } },
+          { data: 'roleName', render: function (data) { return escapeHtml(data); } },
           {
             data: 'status',
             render: function (data) {
-              return data === 1
+              return data == 1
                 ? '<span class="badge text-bg-success">启用</span>'
                 : '<span class="badge text-bg-danger">禁用</span>';
             }
@@ -188,7 +206,7 @@
             render: function (data) {
               let html = '';
               html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="role:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="role:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status === 1 ? '禁用' : '启用') + '</button>';
+              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="role:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
               html += '<button class="btn btn-sm btn-outline-info me-1 btn-perms" data-perm="role:assign-perm" data-id="' + data.id + '">分配权限</button>';
               html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="role:delete" data-id="' + data.id + '">删除</button>';
               return html;
@@ -231,12 +249,14 @@
       const roleCode = $('#role-code').val().trim();
       const roleName = $('#role-name').val().trim();
       const status = parseInt($('input[name="role-status"]:checked').val(), 10);
+      const btn = $('#btn-save');
 
       if (!roleCode || !roleName) {
         showToast('请输入角色编码和名称', 'error');
         return;
       }
 
+      setButtonLoading(btn, true);
       const data = { roleCode: roleCode, roleName: roleName, status: status };
       let req;
       if (id) {
@@ -248,6 +268,8 @@
         showToast('保存成功', 'success');
         roleModal.hide();
         roleTable.ajax.reload();
+      }).always(function () {
+        setButtonLoading(btn, false);
       });
     }
 
@@ -297,10 +319,14 @@
       const ids = checked.map(function (node) { return parseInt(node.id, 10); });
       const halfIds = halfChecked.map(function (node) { return parseInt(node.id, 10); });
       const permissionIds = ids.concat(halfIds);
+      const btn = $('#btn-save-perms');
+      setButtonLoading(btn, true);
       ajaxRequest({ path: '/roles/' + currentRoleId + '/permissions', type: 'POST', data: { permissionIds: permissionIds } }).done(function () {
         showToast('分配成功', 'success');
         permModal.hide();
         roleTable.ajax.reload();
+      }).always(function () {
+        setButtonLoading(btn, false);
       });
     }
 

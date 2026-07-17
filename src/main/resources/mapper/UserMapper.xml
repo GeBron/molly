@@ -27,10 +27,17 @@
         WHERE username = #{username} AND deleted = 0
     </select>
 
-    <select id="findById" resultMap="UserResult">
-        SELECT <include refid="userColumns"/>
-        FROM sys_user
-        WHERE id = #{id} AND deleted = 0
+    <select id="findById" resultMap="UserWithRolesResult">
+        SELECT u.id, u.username, u.password, u.real_name, u.status, u.deleted,
+               u.login_fail_count, u.lock_time, u.created_at, u.updated_at, u.created_by, u.updated_by,
+               r.id AS role_id, r.role_code AS role_role_code, r.role_name AS role_role_name,
+               r.status AS role_status, r.deleted AS role_deleted,
+               r.created_at AS role_created_at, r.updated_at AS role_updated_at,
+               r.created_by AS role_created_by, r.updated_by AS role_updated_by
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0
+        WHERE u.id = #{id} AND u.deleted = 0
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -81,23 +88,48 @@
         WHERE id = #{id}
     </update>
 
-    <select id="selectList" resultMap="UserResult">
+    <resultMap id="UserWithRolesResult" type="com.demo.molly.entity.User" extends="UserResult">
+        <collection property="roles" ofType="com.demo.molly.entity.Role" resultMap="RoleResultWithPrefix"/>
+    </resultMap>
+
+    <resultMap id="UserWithRolesNestedResult" type="com.demo.molly.entity.User" extends="UserResult">
+        <collection property="roles" ofType="com.demo.molly.entity.Role"
+                    select="com.demo.molly.mapper.RoleMapper.selectByUserId" column="id"/>
+    </resultMap>
+
+    <resultMap id="RoleResultWithPrefix" type="com.demo.molly.entity.Role">
+        <id property="id" column="role_id"/>
+        <result property="roleCode" column="role_role_code"/>
+        <result property="roleName" column="role_role_name"/>
+        <result property="status" column="role_status"/>
+        <result property="deleted" column="role_deleted"/>
+        <result property="createdAt" column="role_created_at"/>
+        <result property="updatedAt" column="role_updated_at"/>
+        <result property="createdBy" column="role_created_by"/>
+        <result property="updatedBy" column="role_updated_by"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="UserWithRolesNestedResult">
         SELECT <include refid="userColumns"/>
-        FROM sys_user
+        FROM sys_user u
         <where>
-            deleted = 0
+            u.deleted = 0
             <if test="username != null and username != ''">
-                AND username LIKE CONCAT('%', #{username}, '%')
+                AND u.username LIKE CONCAT('%', #{username}, '%')
             </if>
             <if test="status != null">
-                AND status = #{status}
+                AND u.status = #{status}
             </if>
         </where>
-        ORDER BY created_at DESC
+        ORDER BY u.created_at DESC
     </select>
 
     <select id="selectRoleIdsByUserId" resultType="long">
         SELECT role_id FROM sys_user_role WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectUserIdsByRoleId" resultType="long">
+        SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}
     </select>
 
     <insert id="insertUserRoles">

@@ -32,9 +32,8 @@ public class LogService {
     }
 
     public PageResult<LoginLogVO> loginLogList(LogQueryDTO query) {
-        PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<LoginLog> logs = loginLogMapper.selectList(query.startTime(), query.endTime());
-        PageInfo<LoginLog> pageInfo = new PageInfo<>(logs);
+        PageInfo<LoginLog> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
+                .doSelectPageInfo(() -> loginLogMapper.selectList(query.startTime(), query.endTime()));
 
         List<LoginLogVO> list = pageInfo.getList().stream()
                 .map(log -> new LoginLogVO(
@@ -51,9 +50,8 @@ public class LogService {
     }
 
     public PageResult<OperationLogVO> operationLogList(LogQueryDTO query) {
-        PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<OperationLog> logs = operationLogMapper.selectList(query.startTime(), query.endTime());
-        PageInfo<OperationLog> pageInfo = new PageInfo<>(logs);
+        PageInfo<OperationLog> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
+                .doSelectPageInfo(() -> operationLogMapper.selectList(query.startTime(), query.endTime()));
 
         List<OperationLogVO> list = pageInfo.getList().stream()
                 .map(log -> new OperationLogVO(
