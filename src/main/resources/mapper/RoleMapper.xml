@@ -77,8 +77,8 @@
         FROM sys_role r
         <where>
             r.deleted = 0
-            <if test="roleName != null and roleName != ''">
-                AND r.role_name LIKE CONCAT('%', #{roleName}, '%')
+            <if test="keyword != null and keyword != ''">
+                AND r.role_name LIKE CONCAT('%', #{keyword}, '%')
             </if>
             <if test="status != null">
                 AND r.status = #{status}

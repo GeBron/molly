@@ -52,20 +52,12 @@ public class PermissionDTO {
         this.status = status;
     }
 
-    public String permCode() {
-        return permCode;
-    }
-
     public String getPermCode() {
         return permCode;
     }
 
     public void setPermCode(String permCode) {
         this.permCode = permCode;
-    }
-
-    public String permName() {
-        return permName;
     }
 
     public String getPermName() {
@@ -76,20 +68,12 @@ public class PermissionDTO {
         this.permName = permName;
     }
 
-    public Integer type() {
-        return type;
-    }
-
     public Integer getType() {
         return type;
     }
 
     public void setType(Integer type) {
         this.type = type;
-    }
-
-    public Long parentId() {
-        return parentId;
     }
 
     public Long getParentId() {
@@ -100,10 +84,6 @@ public class PermissionDTO {
         this.parentId = parentId;
     }
 
-    public String path() {
-        return path;
-    }
-
     public String getPath() {
         return path;
     }
@@ -112,20 +92,12 @@ public class PermissionDTO {
         this.path = path;
     }
 
-    public Integer sort() {
-        return sort;
-    }
-
     public Integer getSort() {
         return sort;
     }
 
     public void setSort(Integer sort) {
         this.sort = sort;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {

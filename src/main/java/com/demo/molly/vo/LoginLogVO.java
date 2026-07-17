@@ -27,64 +27,32 @@ public class LoginLogVO {
         this.createdAt = createdAt;
     }
 
-    public Long id() {
-        return id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public Long userId() {
-        return userId;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public String username() {
-        return username;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public String ip() {
-        return ip;
     }
 
     public String getIp() {
         return ip;
     }
 
-    public String operation() {
-        return operation;
-    }
-
     public String getOperation() {
         return operation;
-    }
-
-    public String status() {
-        return status;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public String message() {
-        return message;
-    }
-
     public String getMessage() {
         return message;
-    }
-
-    public LocalDateTime createdAt() {
-        return createdAt;
     }
 
     public LocalDateTime getCreatedAt() {

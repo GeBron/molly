@@ -1,10 +1,10 @@
 package com.demo.molly.service;
 
 import com.demo.molly.common.PageResult;
-import com.demo.molly.dto.AssignRoleDTO;
+import com.demo.molly.dto.AssignIdsDTO;
+import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.UpdateUserDTO;
 import com.demo.molly.dto.UserDTO;
-import com.demo.molly.dto.UserQueryDTO;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -40,12 +40,12 @@ public class UserService {
         this.tokenCacheService = tokenCacheService;
     }
 
-    public PageResult<UserVO> list(UserQueryDTO query) {
+    public PageResult<UserVO> list(KeywordStatusQuery query) {
         PageInfo<User> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
                 .doSelectPageInfo(new ISelect() {
                     @Override
                     public void doSelect() {
-                        userMapper.selectList(query.username(), query.status());
+                        userMapper.selectList(query.getKeyword(), query.getStatus());
                     }
                 });
 
@@ -66,15 +66,15 @@ public class UserService {
 
     @Transactional
     public void create(UserDTO dto) {
-        User exist = userMapper.findByUsername(dto.username());
+        User exist = userMapper.findByUsername(dto.getUsername());
         if (exist != null) {
             throw new BusinessException("用户名已存在");
         }
         User user = new User();
-        user.setUsername(dto.username());
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        user.setRealName(dto.realName());
-        user.setStatus(dto.status() == null ? 1 : dto.status());
+        user.setUsername(dto.getUsername());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRealName(dto.getRealName());
+        user.setStatus(dto.getStatus() == null ? 1 : dto.getStatus());
         AuditUtil.fillCreate(user);
         userMapper.insert(user);
     }
@@ -85,8 +85,8 @@ public class UserService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        user.setRealName(dto.realName());
-        user.setStatus(dto.status());
+        user.setRealName(dto.getRealName());
+        user.setStatus(dto.getStatus());
         AuditUtil.fillUpdate(user);
         userMapper.update(user);
         tokenCacheService.clearUserCache(id);
@@ -119,14 +119,14 @@ public class UserService {
     }
 
     @Transactional
-    public void assignRoles(Long userId, AssignRoleDTO dto) {
+    public void assignRoles(Long userId, AssignIdsDTO dto) {
         User user = userMapper.findById(userId);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteUserRolesByUserId(userId);
-        if (dto.roleIds() != null && !dto.roleIds().isEmpty()) {
-            userMapper.insertUserRoles(userId, dto.roleIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
+        if (dto.getIds() != null && !dto.getIds().isEmpty()) {
+            userMapper.insertUserRoles(userId, dto.getIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
         tokenCacheService.clearUserCache(userId);
     }

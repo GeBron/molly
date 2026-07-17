@@ -27,56 +27,28 @@ public class UserVO {
         this.roleNames = roleNames;
     }
 
-    public Long id() {
-        return id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String username() {
-        return username;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String realName() {
-        return realName;
-    }
-
     public String getRealName() {
         return realName;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {
         return status;
     }
 
-    public LocalDateTime createdAt() {
-        return createdAt;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public List<Long> roleIds() {
-        return roleIds;
-    }
-
     public List<Long> getRoleIds() {
         return roleIds;
-    }
-
-    public List<String> roleNames() {
-        return roleNames;
     }
 
     public List<String> getRoleNames() {

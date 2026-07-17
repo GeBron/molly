@@ -19,32 +19,16 @@ public class UserInfoVO {
         this.menus = menus;
     }
 
-    public UserVO user() {
-        return user;
-    }
-
     public UserVO getUser() {
         return user;
-    }
-
-    public List<String> roles() {
-        return roles;
     }
 
     public List<String> getRoles() {
         return roles;
     }
 
-    public List<String> permissions() {
-        return permissions;
-    }
-
     public List<String> getPermissions() {
         return permissions;
-    }
-
-    public List<MenuVO> menus() {
-        return menus;
     }
 
     public List<MenuVO> getMenus() {

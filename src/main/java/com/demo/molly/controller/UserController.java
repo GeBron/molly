@@ -3,10 +3,10 @@ package com.demo.molly.controller;
 import com.demo.molly.aspect.OperationLog;
 import com.demo.molly.common.PageResult;
 import com.demo.molly.common.Result;
-import com.demo.molly.dto.AssignRoleDTO;
+import com.demo.molly.dto.AssignIdsDTO;
+import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.UpdateUserDTO;
 import com.demo.molly.dto.UserDTO;
-import com.demo.molly.dto.UserQueryDTO;
 import com.demo.molly.service.UserService;
 import com.demo.molly.vo.UserVO;
 import javax.validation.Valid;
@@ -43,7 +43,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:view')")
     @GetMapping
-    public Result<PageResult<UserVO>> list(UserQueryDTO query) {
+    public Result<PageResult<UserVO>> list(KeywordStatusQuery query) {
         return Result.success(userService.list(query));
     }
 
@@ -89,7 +89,7 @@ public class UserController {
     @OperationLog(module = "用户管理", operation = "分配角色")
     @PreAuthorize("hasAuthority('user:create')")
     @PostMapping("/{id}/roles")
-    public Result<Void> assignRoles(@PathVariable Long id, @RequestBody @Valid AssignRoleDTO dto) {
+    public Result<Void> assignRoles(@PathVariable Long id, @RequestBody @Valid AssignIdsDTO dto) {
         userService.assignRoles(id, dto);
         return Result.success();
     }

@@ -45,18 +45,18 @@ public class PermissionService {
 
     @Transactional
     public void create(PermissionDTO dto) {
-        Permission exist = permissionMapper.findByCode(dto.permCode());
+        Permission exist = permissionMapper.findByCode(dto.getPermCode());
         if (exist != null) {
             throw new BusinessException("权限编码已存在");
         }
         Permission permission = new Permission();
-        permission.setPermCode(dto.permCode());
-        permission.setPermName(dto.permName());
-        permission.setType(dto.type());
-        permission.setParentId(dto.parentId() == null ? 0L : dto.parentId());
-        permission.setPath(dto.path());
-        permission.setSort(dto.sort() == null ? 0 : dto.sort());
-        permission.setStatus(dto.status() == null ? 1 : dto.status());
+        permission.setPermCode(dto.getPermCode());
+        permission.setPermName(dto.getPermName());
+        permission.setType(dto.getType());
+        permission.setParentId(dto.getParentId() == null ? 0L : dto.getParentId());
+        permission.setPath(dto.getPath());
+        permission.setSort(dto.getSort() == null ? 0 : dto.getSort());
+        permission.setStatus(dto.getStatus() == null ? 1 : dto.getStatus());
         AuditUtil.fillCreate(permission);
         permissionMapper.insert(permission);
     }
@@ -67,17 +67,17 @@ public class PermissionService {
         if (permission == null) {
             throw new BusinessException("权限不存在");
         }
-        Permission exist = permissionMapper.findByCode(dto.permCode());
+        Permission exist = permissionMapper.findByCode(dto.getPermCode());
         if (exist != null && !exist.getId().equals(id)) {
             throw new BusinessException("权限编码已存在");
         }
-        permission.setPermCode(dto.permCode());
-        permission.setPermName(dto.permName());
-        permission.setType(dto.type());
-        permission.setParentId(dto.parentId() == null ? 0L : dto.parentId());
-        permission.setPath(dto.path());
-        permission.setSort(dto.sort() == null ? 0 : dto.sort());
-        permission.setStatus(dto.status());
+        permission.setPermCode(dto.getPermCode());
+        permission.setPermName(dto.getPermName());
+        permission.setType(dto.getType());
+        permission.setParentId(dto.getParentId() == null ? 0L : dto.getParentId());
+        permission.setPath(dto.getPath());
+        permission.setSort(dto.getSort() == null ? 0 : dto.getSort());
+        permission.setStatus(dto.getStatus());
         AuditUtil.fillUpdate(permission);
         permissionMapper.update(permission);
     }
@@ -122,8 +122,8 @@ public class PermissionService {
                 roots.add(vo);
             } else {
                 PermissionVO parent = map.get(p.getParentId());
-                if (parent != null && parent.children() != null) {
-                    parent.children().add(vo);
+                if (parent != null && parent.getChildren() != null) {
+                    parent.getChildren().add(vo);
                 }
             }
         }

@@ -39,20 +39,12 @@ public class UserDTO {
         this.status = status;
     }
 
-    public String username() {
-        return username;
-    }
-
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String password() {
-        return password;
     }
 
     public String getPassword() {
@@ -63,20 +55,12 @@ public class UserDTO {
         this.password = password;
     }
 
-    public String realName() {
-        return realName;
-    }
-
     public String getRealName() {
         return realName;
     }
 
     public void setRealName(String realName) {
         this.realName = realName;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {

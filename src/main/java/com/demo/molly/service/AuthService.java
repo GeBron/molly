@@ -74,9 +74,9 @@ public class AuthService {
     }
 
     public UserInfoVO login(LoginDTO dto, HttpServletRequest request) {
-        User user = userMapper.findByUsername(dto.username());
+        User user = userMapper.findByUsername(dto.getUsername());
         if (user == null) {
-            saveLoginLog(null, dto.username(), "LOGIN", "FAIL", "用户不存在", request);
+            saveLoginLog(null, dto.getUsername(), "LOGIN", "FAIL", "用户不存在", request);
             throw new BusinessException(401, "用户名或密码错误");
         }
         if (user.getStatus() == null || user.getStatus() != 1) {
@@ -90,7 +90,7 @@ public class AuthService {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password()));
+                    new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
             handleLoginFail(user, request);
@@ -217,8 +217,8 @@ public class AuthService {
                 roots.add(menu);
             } else {
                 MenuVO parent = map.get(p.getParentId());
-                if (parent != null && parent.children() != null) {
-                    parent.children().add(menu);
+                if (parent != null && parent.getChildren() != null) {
+                    parent.getChildren().add(menu);
                 }
             }
         }

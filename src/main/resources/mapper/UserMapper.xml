@@ -121,8 +121,8 @@
         LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0
         <where>
             u.deleted = 0
-            <if test="username != null and username != ''">
-                AND u.username LIKE CONCAT('%', #{username}, '%')
+            <if test="keyword != null and keyword != ''">
+                AND u.username LIKE CONCAT('%', #{keyword}, '%')
             </if>
             <if test="status != null">
                 AND u.status = #{status}

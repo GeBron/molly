@@ -32,7 +32,7 @@ public interface UserMapper {
 
     int resetLoginFail(@Param("id") Long id, @Param("updatedBy") Long updatedBy);
 
-    List<User> selectList(@Param("username") String username,
+    List<User> selectList(@Param("keyword") String keyword,
                           @Param("status") Integer status);
 
     List<Long> selectRoleIdsByUserId(Long userId);

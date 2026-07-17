@@ -25,56 +25,28 @@ public class MenuVO {
         this.children = children;
     }
 
-    public Long id() {
-        return id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String name() {
-        return name;
     }
 
     public String getName() {
         return name;
     }
 
-    public String path() {
-        return path;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public Integer type() {
-        return type;
     }
 
     public Integer getType() {
         return type;
     }
 
-    public String permCode() {
-        return permCode;
-    }
-
     public String getPermCode() {
         return permCode;
     }
 
-    public String icon() {
-        return icon;
-    }
-
     public String getIcon() {
         return icon;
-    }
-
-    public List<MenuVO> children() {
-        return children;
     }
 
     public List<MenuVO> getChildren() {

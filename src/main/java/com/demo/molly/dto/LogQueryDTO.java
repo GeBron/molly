@@ -22,20 +22,12 @@ public class LogQueryDTO extends PageQuery {
         this.endTime = endTime;
     }
 
-    public LocalDateTime startTime() {
-        return startTime;
-    }
-
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
-    }
-
-    public LocalDateTime endTime() {
-        return endTime;
     }
 
     public LocalDateTime getEndTime() {

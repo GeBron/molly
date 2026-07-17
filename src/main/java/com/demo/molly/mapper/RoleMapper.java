@@ -24,7 +24,7 @@ public interface RoleMapper {
 
     int updateDeleted(@Param("id") Long id, @Param("deleted") Integer deleted, @Param("updatedBy") Long updatedBy);
 
-    List<Role> selectList(@Param("roleName") String roleName,
+    List<Role> selectList(@Param("keyword") String keyword,
                           @Param("status") Integer status);
 
     List<Role> selectByUserId(Long userId);
