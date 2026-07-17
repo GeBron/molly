@@ -109,18 +109,6 @@ public class AuthService {
         return buildUserInfo(loginUser);
     }
 
-    public void logout(HttpServletRequest request) {
-        LoginUser loginUser = SecurityUtil.getCurrentUser();
-        Long userId = loginUser != null ? loginUser.getUser().getId() : null;
-        String username = loginUser != null ? loginUser.getUsername() : null;
-
-        if (userId != null) {
-            tokenCacheService.clearUserCache(userId);
-            saveLoginLog(userId, username, "LOGOUT", "SUCCESS", null, request);
-        }
-        SecurityContextHolder.clearContext();
-    }
-
     public UserInfoVO getUserInfo() {
         LoginUser loginUser = SecurityUtil.getCurrentUser();
         if (loginUser == null) {

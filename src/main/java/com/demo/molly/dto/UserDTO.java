@@ -1,6 +1,10 @@
 package com.demo.molly.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 /**
@@ -10,15 +14,19 @@ public class UserDTO {
 
     @NotBlank(message = "用户名不能为空")
     @Size(max = 64, message = "用户名长度不能超过64")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
     private String username;
 
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, message = "密码长度不能小于6")
+    @Size(min = 6, max = 64, message = "密码长度必须在6-64之间")
     private String password;
 
     @Size(max = 64, message = "真实姓名长度不能超过64")
     private String realName;
 
+    @NotNull(message = "状态不能为空")
+    @Min(value = 0, message = "状态值不合法")
+    @Max(value = 1, message = "状态值不合法")
     private Integer status;
 
     public UserDTO() {

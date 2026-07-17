@@ -1,5 +1,7 @@
 package com.demo.molly.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -18,15 +20,23 @@ public class PermissionDTO {
     private String permName;
 
     @NotNull(message = "权限类型不能为空")
+    @Min(value = 1, message = "权限类型必须为1-4")
+    @Max(value = 4, message = "权限类型必须为1-4")
     private Integer type;
 
+    @NotNull(message = "父级ID不能为空")
+    @Min(value = 0, message = "父级ID不能为负数")
     private Long parentId;
 
     @Size(max = 255, message = "路径长度不能超过255")
     private String path;
 
+    @NotNull(message = "排序不能为空")
     private Integer sort;
 
+    @NotNull(message = "状态不能为空")
+    @Min(value = 0, message = "状态值不合法")
+    @Max(value = 1, message = "状态值不合法")
     private Integer status;
 
     public PermissionDTO() {

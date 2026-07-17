@@ -47,7 +47,7 @@
 
 <ul class="nav flex-column" th:fragment="menu(menuList, helper)">
   <li class="nav-item" th:each="menu : ${menuList}">
-    <th:block th:if="${menu.children != null && !menu.children.isEmpty()}">
+    <th:block th:if="${!#lists.isEmpty(menu.children)}">
       <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
          th:href="'#menu-collapse-' + ${menu.id}" role="button"
          th:aria-expanded="${helper.hasActiveDescendant(menu)}"
@@ -60,7 +60,7 @@
         <ul class="nav flex-column" th:replace="~{layout :: menu(${menu.children}, ${helper})}"></ul>
       </div>
     </th:block>
-    <th:block th:unless="${menu.children != null && !menu.children.isEmpty()}">
+    <th:block th:unless="${!#lists.isEmpty(menu.children)}">
       <a class="nav-link" th:href="${helper.getPagePath(menu.path)}"
          th:classappend="${helper.isActive(menu)} ? 'active' : ''"
          th:text="${menu.name}">菜单名</a>

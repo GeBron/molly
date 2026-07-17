@@ -22,7 +22,7 @@ function logout() {
   ajaxRequest({
     path: '/auth/logout',
     type: 'POST'
-  }).always(function () {
+  }).done(function () {
     clearUserInfo();
     window.location.href = '/login';
   });
@@ -40,7 +40,7 @@ $(function () {
         showToast('请输入用户名和密码', 'error');
         return;
       }
-      btn.prop('disabled', true).text('登录中...');
+      setButtonLoading(btn, true);
       ajaxRequest({
         path: '/auth/login',
         type: 'POST',
@@ -53,7 +53,7 @@ $(function () {
           }, 500);
         }
       }).always(function () {
-        btn.prop('disabled', false).text('登录');
+        setButtonLoading(btn, false);
       });
     });
   }

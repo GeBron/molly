@@ -3,6 +3,16 @@ const API_BASE = '/api';
 let currentUserInfo = null;
 const USER_INFO_KEY = 'molly_user_info';
 
+function escapeHtml(text) {
+  if (text == null) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function getUserInfo() {
   if (currentUserInfo) {
     return currentUserInfo;
@@ -56,7 +66,7 @@ function showToast(message, type) {
   const toastHtml =
     '<div class="toast align-items-center ' + bgClass + ' text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">' +
     '  <div class="d-flex">' +
-    '    <div class="toast-body">' + message + '</div>' +
+    '    <div class="toast-body">' + escapeHtml(message) + '</div>' +
     '    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>' +
     '  </div>' +
     '</div>';
@@ -83,7 +93,7 @@ function confirmDialog(message, callback) {
     '        <h5 class="modal-title">确认</h5>' +
     '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
     '      </div>' +
-    '      <div class="modal-body">' + message + '</div>' +
+    '      <div class="modal-body">' + escapeHtml(message) + '</div>' +
     '      <div class="modal-footer">' +
     '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>' +
     '        <button type="button" class="btn btn-danger" id="common-confirm-ok">确定</button>' +
@@ -94,7 +104,8 @@ function confirmDialog(message, callback) {
   $('body').append(modalHtml);
   const modal = new bootstrap.Modal($('#common-confirm-modal')[0]);
   modal.show();
-  $('#common-confirm-ok').on('click', function () {
+  $('#common-confirm-ok').one('click', function () {
+    $(this).prop('disabled', true).text('处理中...');
     modal.hide();
     if (typeof callback === 'function') {
       callback();
@@ -114,6 +125,11 @@ function formatDateTime(isoString) {
     pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
 }
 
+function getCsrfToken() {
+  const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 function ajaxRequest(options) {
   const settings = $.extend({
     url: API_BASE + options.path,
@@ -127,6 +143,13 @@ function ajaxRequest(options) {
     delete settings.contentType;
   } else if (settings.data && settings.contentType === 'application/json' && typeof settings.data !== 'string') {
     settings.data = JSON.stringify(settings.data);
+  }
+
+  const csrfToken = getCsrfToken();
+  if (csrfToken) {
+    settings.headers = $.extend(settings.headers || {}, {
+      'X-XSRF-TOKEN': csrfToken
+    });
   }
 
   return $.ajax(settings)
@@ -152,6 +175,15 @@ function ajaxRequest(options) {
       const res = xhr.responseJSON;
       showToast(res && res.message ? res.message : '请求失败', 'error');
     });
+}
+
+function setButtonLoading(btn, loading) {
+  if (loading) {
+    btn.data('original-text', btn.text());
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...');
+  } else {
+    btn.prop('disabled', false).text(btn.data('original-text') || btn.text());
+  }
 }
 
 function initPage() {

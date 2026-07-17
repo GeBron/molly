@@ -9,6 +9,7 @@ import com.github.pagehelper.PageInfo;
 import com.demo.molly.entity.Role;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.mapper.RoleMapper;
+import com.demo.molly.mapper.UserMapper;
 import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.RoleVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,19 @@ import java.util.stream.Collectors;
 public class RoleService {
 
     private final RoleMapper roleMapper;
+    private final UserMapper userMapper;
+    private final TokenCacheService tokenCacheService;
 
     @Autowired
-    public RoleService(RoleMapper roleMapper) {
+    public RoleService(RoleMapper roleMapper, UserMapper userMapper, TokenCacheService tokenCacheService) {
         this.roleMapper = roleMapper;
+        this.userMapper = userMapper;
+        this.tokenCacheService = tokenCacheService;
     }
 
     public PageResult<RoleVO> list(RoleQueryDTO query) {
-        PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<Role> roles = roleMapper.selectList(query.roleName(), query.status());
-        PageInfo<Role> pageInfo = new PageInfo<>(roles);
+        PageInfo<Role> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
+                .doSelectPageInfo(() -> roleMapper.selectList(query.roleName(), query.status()));
 
         List<RoleVO> list = pageInfo.getList().stream().map(this::toVO).collect(Collectors.toList());
         return new PageResult<>(list, pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize());
@@ -114,10 +118,14 @@ public class RoleService {
         if (dto.permissionIds() != null && !dto.permissionIds().isEmpty()) {
             roleMapper.insertRolePermissions(roleId, dto.permissionIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
+        List<Long> userIds = userMapper.selectUserIdsByRoleId(roleId);
+        for (Long userId : userIds) {
+            tokenCacheService.clearUserCache(userId);
+        }
     }
 
     private RoleVO toVO(Role role) {
-        List<Long> permissionIds = roleMapper.selectPermissionIdsByRoleId(role.getId());
+        List<Long> permissionIds = role.getPermissionIds();
         return new RoleVO(role.getId(), role.getRoleCode(), role.getRoleName(), role.getStatus(), role.getCreatedAt(), permissionIds);
     }
 }

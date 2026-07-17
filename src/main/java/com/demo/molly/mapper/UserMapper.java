@@ -37,6 +37,8 @@ public interface UserMapper {
 
     List<Long> selectRoleIdsByUserId(Long userId);
 
+    List<Long> selectUserIdsByRoleId(Long roleId);
+
     int insertUserRoles(@Param("userId") Long userId,
                         @Param("roleIds") List<Long> roleIds,
                         @Param("createdBy") Long createdBy,

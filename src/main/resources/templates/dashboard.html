@@ -11,8 +11,8 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title fw-bold">欢迎使用 Molly Admin</h5>
-            <p class="card-text text-muted mb-1">当前用户：<span id="info-username"></span></p>
-            <p class="card-text text-muted">角色：<span id="info-roles"></span></p>
+            <p class="card-text text-muted mb-1">当前用户：<span id="info-username" th:text="${userInfo.user.username}">用户名</span></p>
+            <p class="card-text text-muted">角色：<span id="info-roles" th:text="${#lists.isEmpty(userInfo.roles)} ? '-' : ${#strings.listJoin(userInfo.roles, ', ')}">角色</span></p>
           </div>
         </div>
       </div>
@@ -44,12 +44,7 @@
   </div>
 
   <script>
-    $(function () {
-      checkLogin(function (info) {
-        $('#info-username').text(info.user.username);
-        $('#info-roles').text(info.roles && info.roles.length > 0 ? info.roles.join(', ') : '-');
-      });
-    });
+    // 用户信息已由服务端渲染，无需额外 AJAX 请求
   </script>
 </body>
 </html>
