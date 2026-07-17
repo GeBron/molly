@@ -47,6 +47,7 @@ $(function () {
         data: { username: username, password: password }
       }).done(function (res) {
         if (res && res.code === 200 && res.data) {
+          setUserInfo(res.data);
           showToast('登录成功', 'success');
           setTimeout(function () {
             window.location.href = '/dashboard';
