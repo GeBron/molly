@@ -10,11 +10,10 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=1800s
 
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:sql/init_schema.sql
-      data-locations: classpath:sql/init_data.sql
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 2
 
   servlet:
     session:
