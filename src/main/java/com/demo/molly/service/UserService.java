@@ -80,6 +80,7 @@ public class UserService {
         user.setStatus(dto.status());
         AuditUtil.fillUpdate(user);
         userMapper.update(user);
+        tokenCacheService.clearUserCache(id);
     }
 
     @Transactional
@@ -92,6 +93,7 @@ public class UserService {
             throw new BusinessException("不能删除超级管理员");
         }
         userMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
+        tokenCacheService.clearUserCache(id);
     }
 
     @Transactional
@@ -104,6 +106,7 @@ public class UserService {
             throw new BusinessException("不能禁用超级管理员");
         }
         userMapper.updateStatus(id, status, AuditUtil.currentUserId());
+        tokenCacheService.clearUserCache(id);
     }
 
     @Transactional
