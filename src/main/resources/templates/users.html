@@ -122,7 +122,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <select class="form-select" id="role-select" multiple size="10"></select>
+          <div id="role-select" class="role-check-list"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -312,20 +312,24 @@
       ).done(function (userRes, roleRes) {
         const user = userRes[0].data;
         const selected = user.roleIds || [];
-        const select = $('#role-select').empty();
+        const container = $('#role-select').empty();
         allRoles.forEach(function (role) {
-          const option = $('<option></option>').val(role.id).text(escapeHtml(role.roleName) + ' (' + escapeHtml(role.roleCode) + ')');
-          if (selected.includes(role.id)) {
-            option.prop('selected', true);
-          }
-          select.append(option);
+          const checked = selected.includes(role.id) ? 'checked' : '';
+          const item = $('<div class="form-check"></div>').html(
+            '<input class="form-check-input" type="checkbox" id="role-check-' + role.id + '" value="' + role.id + '" ' + checked + '>' +
+            '<label class="form-check-label" for="role-check-' + role.id + '">' + escapeHtml(role.roleName) + ' (' + escapeHtml(role.roleCode) + ')</label>'
+          );
+          container.append(item);
         });
         roleModal.show();
       });
     }
 
     function saveAssignRoles() {
-      const roleIds = $('#role-select').val().map(Number);
+      const roleIds = [];
+      $('#role-select input[type="checkbox"]:checked').each(function () {
+        roleIds.push(parseInt($(this).val(), 10));
+      });
       const btn = $('#btn-save-roles');
       setButtonLoading(btn, true);
       ajaxRequest({ path: '/users/' + currentUserId + '/roles', type: 'POST', data: { roleIds: roleIds } }).done(function () {
