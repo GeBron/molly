@@ -37,7 +37,7 @@ public class LogService {
                 .doSelectPageInfo(new ISelect() {
                     @Override
                     public void doSelect() {
-                        loginLogMapper.selectList(query.startTime(), query.endTime());
+                        loginLogMapper.selectList(query.getStartTime(), query.getEndTime());
                     }
                 });
 
@@ -61,7 +61,7 @@ public class LogService {
                 .doSelectPageInfo(new ISelect() {
                     @Override
                     public void doSelect() {
-                        operationLogMapper.selectList(query.startTime(), query.endTime());
+                        operationLogMapper.selectList(query.getStartTime(), query.getEndTime());
                     }
                 });
 

@@ -33,10 +33,6 @@ public class RoleDTO {
         this.status = status;
     }
 
-    public String roleCode() {
-        return roleCode;
-    }
-
     public String getRoleCode() {
         return roleCode;
     }
@@ -45,20 +41,12 @@ public class RoleDTO {
         this.roleCode = roleCode;
     }
 
-    public String roleName() {
-        return roleName;
-    }
-
     public String getRoleName() {
         return roleName;
     }
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {

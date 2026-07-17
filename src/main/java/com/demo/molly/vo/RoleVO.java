@@ -24,48 +24,24 @@ public class RoleVO {
         this.permissionIds = permissionIds;
     }
 
-    public Long id() {
-        return id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String roleCode() {
-        return roleCode;
     }
 
     public String getRoleCode() {
         return roleCode;
     }
 
-    public String roleName() {
-        return roleName;
-    }
-
     public String getRoleName() {
         return roleName;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {
         return status;
     }
 
-    public LocalDateTime createdAt() {
-        return createdAt;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public List<Long> permissionIds() {
-        return permissionIds;
     }
 
     public List<Long> getPermissionIds() {

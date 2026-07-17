@@ -21,20 +21,12 @@ public class LoginDTO {
         this.password = password;
     }
 
-    public String username() {
-        return username;
-    }
-
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String password() {
-        return password;
     }
 
     public String getPassword() {

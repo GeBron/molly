@@ -3,9 +3,9 @@ package com.demo.molly.controller;
 import com.demo.molly.aspect.OperationLog;
 import com.demo.molly.common.PageResult;
 import com.demo.molly.common.Result;
-import com.demo.molly.dto.AssignPermissionDTO;
+import com.demo.molly.dto.AssignIdsDTO;
+import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.RoleDTO;
-import com.demo.molly.dto.RoleQueryDTO;
 import com.demo.molly.service.RoleService;
 import com.demo.molly.vo.RoleVO;
 import javax.validation.Valid;
@@ -42,7 +42,7 @@ public class RoleController {
 
     @PreAuthorize("hasAuthority('role:view')")
     @GetMapping
-    public Result<PageResult<RoleVO>> list(RoleQueryDTO query) {
+    public Result<PageResult<RoleVO>> list(KeywordStatusQuery query) {
         return Result.success(roleService.list(query));
     }
 
@@ -88,7 +88,7 @@ public class RoleController {
     @OperationLog(module = "角色管理", operation = "分配权限")
     @PreAuthorize("hasAuthority('role:assign-perm')")
     @PostMapping("/{id}/permissions")
-    public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid AssignPermissionDTO dto) {
+    public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid AssignIdsDTO dto) {
         roleService.assignPermissions(id, dto);
         return Result.success();
     }

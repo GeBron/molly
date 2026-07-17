@@ -1,9 +1,8 @@
 package com.demo.molly.controller;
 
 import com.demo.molly.common.PageResult;
+import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.LogQueryDTO;
-import com.demo.molly.dto.RoleQueryDTO;
-import com.demo.molly.dto.UserQueryDTO;
 import com.demo.molly.exception.BusinessException;
 import com.demo.molly.service.AuthService;
 import com.demo.molly.service.LogService;
@@ -85,7 +84,7 @@ public class PageController {
     @GetMapping("/users")
     public String users(Model model) {
         addLayout(model, "用户管理", "system/user");
-        PageResult<UserVO> initialData = userService.list(new UserQueryDTO(null, null, 1, 10));
+        PageResult<UserVO> initialData = userService.list(new KeywordStatusQuery(null, null, 1, 10));
         model.addAttribute("initialData", initialData);
         return "users";
     }
@@ -94,7 +93,7 @@ public class PageController {
     @GetMapping("/roles")
     public String roles(Model model) {
         addLayout(model, "角色管理", "system/role");
-        PageResult<RoleVO> initialData = roleService.list(new RoleQueryDTO(null, null, 1, 10));
+        PageResult<RoleVO> initialData = roleService.list(new KeywordStatusQuery(null, null, 1, 10));
         model.addAttribute("initialData", initialData);
         return "roles";
     }

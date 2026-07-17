@@ -26,20 +26,12 @@ public class UpdateUserDTO {
         this.status = status;
     }
 
-    public String realName() {
-        return realName;
-    }
-
     public String getRealName() {
         return realName;
     }
 
     public void setRealName(String realName) {
         this.realName = realName;
-    }
-
-    public Integer status() {
-        return status;
     }
 
     public Integer getStatus() {

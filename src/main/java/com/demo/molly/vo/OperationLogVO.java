@@ -39,104 +39,52 @@ public class OperationLogVO {
         this.createdAt = createdAt;
     }
 
-    public Long id() {
-        return id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public Long userId() {
-        return userId;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public String username() {
-        return username;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public String module() {
-        return module;
     }
 
     public String getModule() {
         return module;
     }
 
-    public String operation() {
-        return operation;
-    }
-
     public String getOperation() {
         return operation;
-    }
-
-    public String requestUrl() {
-        return requestUrl;
     }
 
     public String getRequestUrl() {
         return requestUrl;
     }
 
-    public String requestMethod() {
-        return requestMethod;
-    }
-
     public String getRequestMethod() {
         return requestMethod;
-    }
-
-    public String method() {
-        return method;
     }
 
     public String getMethod() {
         return method;
     }
 
-    public String params() {
-        return params;
-    }
-
     public String getParams() {
         return params;
-    }
-
-    public String result() {
-        return result;
     }
 
     public String getResult() {
         return result;
     }
 
-    public Long duration() {
-        return duration;
-    }
-
     public Long getDuration() {
         return duration;
     }
 
-    public String ip() {
-        return ip;
-    }
-
     public String getIp() {
         return ip;
-    }
-
-    public LocalDateTime createdAt() {
-        return createdAt;
     }
 
     public LocalDateTime getCreatedAt() {

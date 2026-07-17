@@ -1,9 +1,9 @@
 package com.demo.molly.service;
 
 import com.demo.molly.common.PageResult;
-import com.demo.molly.dto.AssignPermissionDTO;
+import com.demo.molly.dto.AssignIdsDTO;
+import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.RoleDTO;
-import com.demo.molly.dto.RoleQueryDTO;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -37,12 +37,12 @@ public class RoleService {
         this.tokenCacheService = tokenCacheService;
     }
 
-    public PageResult<RoleVO> list(RoleQueryDTO query) {
+    public PageResult<RoleVO> list(KeywordStatusQuery query) {
         PageInfo<Role> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
                 .doSelectPageInfo(new ISelect() {
                     @Override
                     public void doSelect() {
-                        roleMapper.selectList(query.roleName(), query.status());
+                        roleMapper.selectList(query.getKeyword(), query.getStatus());
                     }
                 });
 
@@ -63,14 +63,14 @@ public class RoleService {
 
     @Transactional
     public void create(RoleDTO dto) {
-        Role exist = roleMapper.findByCode(dto.roleCode());
+        Role exist = roleMapper.findByCode(dto.getRoleCode());
         if (exist != null) {
             throw new BusinessException("角色编码已存在");
         }
         Role role = new Role();
-        role.setRoleCode(dto.roleCode());
-        role.setRoleName(dto.roleName());
-        role.setStatus(dto.status() == null ? 1 : dto.status());
+        role.setRoleCode(dto.getRoleCode());
+        role.setRoleName(dto.getRoleName());
+        role.setStatus(dto.getStatus() == null ? 1 : dto.getStatus());
         AuditUtil.fillCreate(role);
         roleMapper.insert(role);
     }
@@ -81,13 +81,13 @@ public class RoleService {
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
-        Role exist = roleMapper.findByCode(dto.roleCode());
+        Role exist = roleMapper.findByCode(dto.getRoleCode());
         if (exist != null && !exist.getId().equals(id)) {
             throw new BusinessException("角色编码已存在");
         }
-        role.setRoleCode(dto.roleCode());
-        role.setRoleName(dto.roleName());
-        role.setStatus(dto.status());
+        role.setRoleCode(dto.getRoleCode());
+        role.setRoleName(dto.getRoleName());
+        role.setStatus(dto.getStatus());
         AuditUtil.fillUpdate(role);
         roleMapper.update(role);
     }
@@ -118,14 +118,14 @@ public class RoleService {
     }
 
     @Transactional
-    public void assignPermissions(Long roleId, AssignPermissionDTO dto) {
+    public void assignPermissions(Long roleId, AssignIdsDTO dto) {
         Role role = roleMapper.findById(roleId);
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
         roleMapper.deleteRolePermissionsByRoleId(roleId);
-        if (dto.permissionIds() != null && !dto.permissionIds().isEmpty()) {
-            roleMapper.insertRolePermissions(roleId, dto.permissionIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
+        if (dto.getIds() != null && !dto.getIds().isEmpty()) {
+            roleMapper.insertRolePermissions(roleId, dto.getIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
         List<Long> userIds = userMapper.selectUserIdsByRoleId(roleId);
         for (Long userId : userIds) {
