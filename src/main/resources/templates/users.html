@@ -286,7 +286,7 @@
 
     function toggleStatus(id, currentStatus) {
       const newStatus = currentStatus === 1 ? 0 : 1;
-      ajaxRequest({ path: '/users/' + id + '/status', type: 'PUT', data: { status: newStatus } }).done(function () {
+      ajaxRequest({ path: '/users/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
         showToast('状态更新成功', 'success');
         userTable.ajax.reload();
       });
