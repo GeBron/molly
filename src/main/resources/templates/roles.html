@@ -311,7 +311,7 @@
           },
           plugins: ['checkbox']
         });
-        treeEl.on('ready.jstree', function () {
+        treeEl.off('ready.jstree').on('ready.jstree', function () {
           treeEl.jstree(true).check_node(selected);
         });
         permModal.show();
@@ -321,10 +321,8 @@
     function saveAssignPerms() {
       const tree = $('#perm-tree').jstree(true);
       const checked = tree.get_checked(true);
-      const halfChecked = tree.get_undetermined(true);
       const ids = checked.map(function (node) { return parseInt(node.id, 10); });
-      const halfIds = halfChecked.map(function (node) { return parseInt(node.id, 10); });
-      const permissionIds = ids.concat(halfIds);
+      const permissionIds = ids;
       const btn = $('#btn-save-perms');
       setButtonLoading(btn, true);
       ajaxRequest({ path: '/roles/' + currentRoleId + '/permissions', type: 'POST', data: { permissionIds: permissionIds } }).done(function () {
