@@ -143,6 +143,9 @@
     const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
 
     function loadRoles() {
+      if (allRoles && allRoles.length > 0) {
+        return $.Deferred().resolve({ data: { list: allRoles } }).promise();
+      }
       return ajaxRequest({ path: '/roles', type: 'GET', data: { pageNum: 1, pageSize: 9999 } }).done(function (res) {
         allRoles = res.data.list || [];
       });
@@ -303,8 +306,11 @@
 
     function openAssignRoles(id) {
       currentUserId = id;
-      ajaxRequest({ path: '/users/' + id, type: 'GET' }).done(function (res) {
-        const user = res.data;
+      $.when(
+        ajaxRequest({ path: '/users/' + id, type: 'GET' }),
+        loadRoles()
+      ).done(function (userRes, roleRes) {
+        const user = userRes[0].data;
         const selected = user.roleIds || [];
         const select = $('#role-select').empty();
         allRoles.forEach(function (role) {
@@ -332,9 +338,7 @@
     }
 
     $(function () {
-      loadRoles().done(function () {
-        renderTable();
-      });
+      renderTable();
 
       $('#query-form').on('submit', function (e) {
         e.preventDefault();

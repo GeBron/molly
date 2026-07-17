@@ -139,6 +139,9 @@
     const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
 
     function loadPermissions() {
+      if (permissionTree && permissionTree.length > 0) {
+        return $.Deferred().resolve({ data: permissionTree }).promise();
+      }
       return ajaxRequest({ path: '/permissions', type: 'GET' }).done(function (res) {
         permissionTree = res.data || [];
       });
@@ -292,8 +295,11 @@
 
     function openAssignPerms(id) {
       currentRoleId = id;
-      ajaxRequest({ path: '/roles/' + id, type: 'GET' }).done(function (res) {
-        const role = res.data;
+      $.when(
+        ajaxRequest({ path: '/roles/' + id, type: 'GET' }),
+        loadPermissions()
+      ).done(function (roleRes, permRes) {
+        const role = roleRes[0].data;
         const selected = role.permissionIds || [];
         const treeData = buildJsTreeData(permissionTree);
         const treeEl = $('#perm-tree');
@@ -331,9 +337,7 @@
     }
 
     $(function () {
-      loadPermissions().done(function () {
-        renderTable();
-      });
+      renderTable();
 
       $('#query-form').on('submit', function (e) {
         e.preventDefault();
