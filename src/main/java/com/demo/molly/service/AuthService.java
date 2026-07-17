@@ -176,7 +176,7 @@ public class AuthService {
             log.setUpdatedBy(operatorId);
             loginLogMapper.insert(log);
         } catch (Exception e) {
-            logger.error("保存登录日志失败", e);
+            logger.warn("保存登录日志失败，username={}, operation={}, status={}", username, operation, status, e);
         }
     }
 

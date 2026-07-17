@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS sys_user (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    INDEX idx_user_status (status),
-    INDEX idx_user_deleted (deleted)
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+CREATE INDEX IF NOT EXISTS idx_user_status ON sys_user(status);
+CREATE INDEX IF NOT EXISTS idx_user_deleted ON sys_user(deleted);
 
 CREATE TABLE IF NOT EXISTS sys_role (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '角色ID',
@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS sys_role (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    INDEX idx_role_status (status),
-    INDEX idx_role_deleted (deleted)
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
+CREATE INDEX IF NOT EXISTS idx_role_status ON sys_role(status);
+CREATE INDEX IF NOT EXISTS idx_role_deleted ON sys_role(deleted);
 
 CREATE TABLE IF NOT EXISTS sys_permission (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '权限ID',
@@ -42,12 +42,12 @@ CREATE TABLE IF NOT EXISTS sys_permission (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    INDEX idx_permission_parent_id (parent_id),
-    INDEX idx_permission_type (type),
-    INDEX idx_permission_status (status),
-    INDEX idx_permission_deleted (deleted)
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限表';
+CREATE INDEX IF NOT EXISTS idx_permission_parent_id ON sys_permission(parent_id);
+CREATE INDEX IF NOT EXISTS idx_permission_type ON sys_permission(type);
+CREATE INDEX IF NOT EXISTS idx_permission_status ON sys_permission(status);
+CREATE INDEX IF NOT EXISTS idx_permission_deleted ON sys_permission(deleted);
 
 CREATE TABLE IF NOT EXISTS sys_user_role (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS sys_user_role (
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    UNIQUE KEY uk_user_role (user_id, role_id),
-    INDEX idx_user_role_role_id (role_id)
+    UNIQUE KEY uk_user_role (user_id, role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
+CREATE INDEX IF NOT EXISTS idx_user_role_role_id ON sys_user_role(role_id);
 
 CREATE TABLE IF NOT EXISTS sys_role_permission (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
@@ -71,9 +71,9 @@ CREATE TABLE IF NOT EXISTS sys_role_permission (
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    UNIQUE KEY uk_role_permission (role_id, permission_id),
-    INDEX idx_role_permission_permission_id (permission_id)
+    UNIQUE KEY uk_role_permission (role_id, permission_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色权限关联表';
+CREATE INDEX IF NOT EXISTS idx_role_permission_permission_id ON sys_role_permission(permission_id);
 
 CREATE TABLE IF NOT EXISTS sys_login_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
@@ -87,10 +87,10 @@ CREATE TABLE IF NOT EXISTS sys_login_log (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    INDEX idx_login_log_user_id (user_id),
-    INDEX idx_login_log_created_at (created_at)
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日志表';
+CREATE INDEX IF NOT EXISTS idx_login_log_user_id ON sys_login_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_login_log_created_at ON sys_login_log(created_at);
 
 CREATE TABLE IF NOT EXISTS sys_operation_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS sys_operation_log (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     created_by BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     updated_by BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除',
-    INDEX idx_operation_log_user_id (user_id),
-    INDEX idx_operation_log_created_at (created_at)
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0正常 1删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志表';
+CREATE INDEX IF NOT EXISTS idx_operation_log_user_id ON sys_operation_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_operation_log_created_at ON sys_operation_log(created_at);

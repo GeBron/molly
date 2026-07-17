@@ -109,9 +109,16 @@
         <result property="updatedBy" column="role_updated_by"/>
     </resultMap>
 
-    <select id="selectList" resultMap="UserWithRolesNestedResult">
-        SELECT <include refid="userColumns"/>
+    <select id="selectList" resultMap="UserWithRolesResult">
+        SELECT u.id, u.username, u.password, u.real_name, u.status, u.deleted,
+               u.login_fail_count, u.lock_time, u.created_at, u.updated_at, u.created_by, u.updated_by,
+               r.id AS role_id, r.role_code AS role_role_code, r.role_name AS role_role_name,
+               r.status AS role_status, r.deleted AS role_deleted,
+               r.created_at AS role_created_at, r.updated_at AS role_updated_at,
+               r.created_by AS role_created_by, r.updated_by AS role_updated_by
         FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0
         <where>
             u.deleted = 0
             <if test="username != null and username != ''">
