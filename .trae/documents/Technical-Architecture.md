@@ -9,9 +9,9 @@ graph LR
     C --> D["Controller"]
     D --> E["Service"]
     E --> F["MyBatis Mapper"]
-    F --> G["TiDB Cloud MySQL"]
+    F --> G["H2 数据库（MySQL 兼容模式）"]
     D --> H["Thymeleaf 模板"]
-    E --> I["Redis 缓存"]
+    E --> I["Caffeine 本地缓存"]
     D --> J["操作日志 AOP"]
     J --> K["AsyncLogService 异步写入"]
     D --> L["登录日志"]
@@ -20,11 +20,11 @@ graph LR
 ## 2. 技术说明
 
 - **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），Thymeleaf 模板位于 `src/main/resources/templates/`，由 Spring Boot 直接渲染并托管静态资源
-- **后端**：Spring Boot 2.7.18 + Spring Security + MyBatis + MySQL/TiDB
+- **后端**：Spring Boot 2.7.18 + Spring Security + MyBatis + H2（MySQL 兼容模式）
 - **认证**：Spring Security Session/Cookie 登录，Session 有效期 30 分钟
-- **缓存**：Spring Data Redis（默认 Upstash Redis，SSL 连接），缓存用户角色与权限
+- **缓存**：Spring Cache + Caffeine 本地缓存，缓存用户角色与权限
 - **权限模型**：RBAC，用户 -> 角色 -> 权限
-- **数据库**：TiDB Cloud MySQL 兼容实例
+- **数据库**：H2（MySQL 兼容模式），开发环境使用文件持久化，测试环境使用独立内存库
 - **部署**：Spring Boot 内置容器直接运行，页面由后端渲染
 
 ## 3. 页面路径
@@ -105,7 +105,7 @@ graph TD
     I["LogController"] --> J["LogService"]
     B --> K["UserDetailsServiceImpl"]
     K --> L["TokenCacheService"]
-    L --> M["Redis"]
+    L --> M["Caffeine Cache"]
     D --> N["UserMapper"]
     F --> O["RoleMapper"]
     H --> P["PermissionMapper"]
@@ -234,7 +234,11 @@ erDiagram
 
 ### 6.2 数据定义
 
-建表语句与初始化数据由项目根目录下的 `sql/init_schema.sql` 与 `sql/init_data.sql` 提供，需要手动导入数据库。
+建表语句与初始化数据由项目根目录下的 `sql/init_schema.sql` 与 `sql/init_data.sql` 提供。应用启动时通过 `spring.sql.init` 自动执行，无需手动导入。
+
+- **开发环境**：H2 文件库（`./data/molly-dev`），数据持久化到项目目录
+- **测试环境**：H2 内存库（`molly-test`），每次测试独立初始化
+- **生产环境**：H2 文件库（`./data/molly-prod`）
 
 ### 6.3 关键字段说明
 
@@ -246,8 +250,8 @@ erDiagram
 ## 7. 认证与授权
 
 - 登录接口为 `POST /api/auth/login`，成功后建立 Spring Security Session，Cookie 名称为 `SESSION`，启用 `HttpOnly` 与 `SameSite=Strict`。
-- 登出时清除 SecurityContext 并清空 Redis 中的用户角色/权限缓存。
-- 用户角色与权限在登录时加载并缓存到 Redis；权限编码存储为 `system:user:view` 等形式，实际鉴权时会转换为 `user:view`、`loginLog:view`、`operationLog:view` 等 Authority。
+- 登出时清除 SecurityContext 并清空 Caffeine 中的用户角色/权限缓存。
+- 用户角色与权限在登录时加载并缓存到 Caffeine；权限编码存储为 `system:user:view` 等形式，实际鉴权时会转换为 `user:view`、`loginLog:view`、`operationLog:view` 等 Authority。
 - 页面访问通过 `@PreAuthorize("hasAuthority('xxx:view')")` 控制，接口操作通过对应 Authority 控制。
 
 ## 8. 日志
