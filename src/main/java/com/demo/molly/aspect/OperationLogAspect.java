@@ -19,7 +19,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 操作日志切面
@@ -95,12 +97,16 @@ public class OperationLogAspect {
     }
 
     private String serializeParams(Object[] args, com.demo.molly.aspect.OperationLog operationLog) {
-        Object[] filtered = Arrays.stream(args)
-                .filter(arg -> !(arg instanceof HttpServletRequest)
-                        && !(arg instanceof HttpServletResponse)
-                        && !(arg instanceof MultipartFile)
-                        && !(arg instanceof MultipartFile[]))
-                .toArray();
+        List<Object> filteredList = new ArrayList<>();
+        for (Object arg : args) {
+            if (!(arg instanceof HttpServletRequest)
+                    && !(arg instanceof HttpServletResponse)
+                    && !(arg instanceof MultipartFile)
+                    && !(arg instanceof MultipartFile[])) {
+                filteredList.add(arg);
+            }
+        }
+        Object[] filtered = filteredList.toArray(new Object[0]);
         try {
             String json = objectMapper.writeValueAsString(filtered);
             return SensitiveDataUtil.maskJson(json, objectMapper, operationLog.sensitiveFields());

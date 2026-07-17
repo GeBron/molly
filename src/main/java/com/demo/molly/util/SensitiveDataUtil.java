@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,7 +45,9 @@ public class SensitiveDataUtil {
     private static void maskNode(JsonNode node, Set<String> fields) {
         if (node.isObject()) {
             ObjectNode objectNode = (ObjectNode) node;
-            objectNode.fields().forEachRemaining(entry -> {
+            Iterator<Map.Entry<String, JsonNode>> iterator = objectNode.fields();
+            while (iterator.hasNext()) {
+                Map.Entry<String, JsonNode> entry = iterator.next();
                 String key = entry.getKey();
                 JsonNode value = entry.getValue();
                 if (fields.contains(key)) {
@@ -51,9 +55,11 @@ public class SensitiveDataUtil {
                 } else {
                     maskNode(value, fields);
                 }
-            });
+            }
         } else if (node.isArray()) {
-            node.forEach(element -> maskNode(element, fields));
+            for (JsonNode element : node) {
+                maskNode(element, fields);
+            }
         }
     }
 }

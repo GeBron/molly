@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,28 +38,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ":" + error.getDefaultMessage())
-                .findFirst()
-                .orElse(ErrorCode.PARAM_ERROR.getMessage());
+        String message = ErrorCode.PARAM_ERROR.getMessage();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            message = error.getField() + ":" + error.getDefaultMessage();
+            break;
+        }
         return Result.error(ErrorCode.PARAM_ERROR.getCode(), message);
     }
 
     @ExceptionHandler(BindException.class)
     public Result<Void> handleBindException(BindException e) {
-        String message = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ":" + error.getDefaultMessage())
-                .findFirst()
-                .orElse(ErrorCode.PARAM_ERROR.getMessage());
+        String message = ErrorCode.PARAM_ERROR.getMessage();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            message = error.getField() + ":" + error.getDefaultMessage();
+            break;
+        }
         return Result.error(ErrorCode.PARAM_ERROR.getCode(), message);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public Result<Void> handleConstraintViolationException(ConstraintViolationException e) {
-        String message = e.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .findFirst()
-                .orElse(ErrorCode.PARAM_ERROR.getMessage());
+        String message = ErrorCode.PARAM_ERROR.getMessage();
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            message = violation.getMessage();
+            break;
+        }
         return Result.error(ErrorCode.PARAM_ERROR.getCode(), message);
     }
 
