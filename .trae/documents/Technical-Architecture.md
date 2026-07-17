@@ -234,7 +234,7 @@ erDiagram
 
 ### 6.2 数据定义
 
-建表语句与初始化数据由项目根目录下的 `sql/init_schema.sql` 与 `sql/init_data.sql` 提供。应用启动时通过 `spring.sql.init` 自动执行，无需手动导入。
+建表语句与初始化数据由项目根目录下的 `sql/V1__init_schema.sql` 与 `sql/V2__init_data.sql` 提供。应用启动时通过 Flyway 自动执行并按版本管理，无需手动导入。后续变更按 `sql/V{版本号}__描述.sql` 命名新增迁移脚本即可。
 
 - **开发环境**：H2 文件库（`./data/molly-dev`），数据持久化到项目目录
 - **测试环境**：H2 内存库（`molly-test`），每次测试独立初始化
@@ -251,7 +251,7 @@ erDiagram
 
 - 登录接口为 `POST /api/auth/login`，成功后建立 Spring Security Session，Cookie 名称为 `SESSION`，启用 `HttpOnly` 与 `SameSite=Strict`。
 - 登出时清除 SecurityContext 并清空 Caffeine 中的用户角色/权限缓存。
-- 用户角色与权限在登录时加载并缓存到 Caffeine；权限编码存储为 `system:user:view` 等形式，实际鉴权时会转换为 `user:view`、`loginLog:view`、`operationLog:view` 等 Authority。
+- 用户角色与权限在登录时加载并缓存到 Caffeine；权限编码直接作为 Authority 使用（如 `user:view`、`loginLog:view`、`operationLog:view`），数据库中统一存储为 `xxx:view` 格式，不再做运行时转换。历史数据库中的 `system:xxx` 编码由 Flyway V3 脚本自动迁移。
 - 页面访问通过 `@PreAuthorize("hasAuthority('xxx:view')")` 控制，接口操作通过对应 Authority 控制。
 
 ## 8. 日志

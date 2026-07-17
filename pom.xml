@@ -63,6 +63,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!-- Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -100,7 +106,7 @@
             </resource>
             <resource>
                 <directory>sql</directory>
-                <targetPath>sql</targetPath>
+                <targetPath>db/migration</targetPath>
                 <includes>
                     <include>*.sql</include>
                 </includes>

@@ -64,7 +64,9 @@ mvn spring-boot:run
 > - 测试环境：H2 内存库 `molly-test`，每次测试独立初始化
 > - 生产环境：H2 文件库，数据持久化到 `./data/molly-prod`
 >
-> 表结构与基础数据由 `sql/init_schema.sql` 和 `sql/init_data.sql` 提供，应用启动时通过 `spring.sql.init` 自动导入。
+> 表结构与基础数据由 `sql/V1__init_schema.sql`、`sql/V2__init_data.sql` 提供，应用启动时通过 Flyway 自动迁移。
+>
+> 后续对表结构或基础数据的变更，按 `sql/V{版本号}__描述.sql` 命名新增迁移脚本，Flyway 会在启动时自动按版本顺序执行。
 
 默认超级管理员账号：
 
@@ -159,8 +161,9 @@ molly
 │           ├── application.yml             # 测试默认激活 test profile
 │           └── application-test.yml        # 测试环境数据源（H2 内存库）
 ├── sql/
-│   ├── init_schema.sql                      # 建表语句
-│   └── init_data.sql                        # 初始化基础数据
+│   ├── V1__init_schema.sql                  # Flyway 建表脚本
+│   ├── V2__init_data.sql                    # Flyway 初始化基础数据
+│   └── V3__update_permission_codes.sql      # Flyway 权限编码迁移示例
 ├── pom.xml
 └── README.md
 ```
