@@ -5,18 +5,16 @@ spring:
   profiles:
     active: dev
 
-  redis:
-    host: mature-ox-119917.upstash.io
-    port: 6379
-    username: ${REDIS_USERNAME}
-    password: ${REDIS_PASSWORD}
-    ssl: true
-    timeout: 10s
-    database: 0
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=1800s
 
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:sql/init_schema.sql
+      data-locations: classpath:sql/init_data.sql
 
   servlet:
     session:
@@ -32,7 +30,7 @@ mybatis:
     map-underscore-to-camel-case: true
 
 pagehelper:
-  helper-dialect: mysql
+  helper-dialect: h2
   reasonable: true
   support-methods-arguments: true
 

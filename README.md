@@ -11,8 +11,8 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 | 构建工具 | Maven |
 | Spring Boot | 2.7.18 |
 | Java | 1.8 |
-| 数据库 | TiDB Cloud（MySQL 兼容）/ MySQL |
-| 缓存 | Redis（默认 Upstash，SSL） |
+| 数据库 | H2（MySQL 兼容模式） |
+| 缓存 | Caffeine（本地缓存） |
 | 模板引擎 | Thymeleaf |
 | 前端 | jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN） |
 
@@ -26,11 +26,11 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 - Spring Security（Session/Cookie 登录）
 - Spring Validation
 - Spring AOP
-- Spring Data Redis
+- Spring Cache + Caffeine
 - Thymeleaf
 - MyBatis Spring Boot Starter 2.3.2
 - PageHelper 1.4.7（MyBatis 分页插件）
-- MySQL Connector/J
+- H2 Database（MySQL 兼容模式）
 
 ### 前端
 
@@ -47,39 +47,10 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 
 - JDK 1.8 及以上
 - Maven 3.6 及以上
-- Redis 服务（本地或远程，默认 `localhost:6379`）
-- TiDB Cloud / MySQL 数据库
 
 ## 快速开始
 
-### 1. 配置环境变量
-
-```bash
-export TiDB_USERNAME=<your_tidb_username>
-export TiDB_PASSWORD=<your_tidb_password>
-export REDIS_USERNAME=<your_redis_username>
-export REDIS_PASSWORD=<your_redis_password>
-```
-
-> 测试环境默认使用独立的 `test` 数据库，避免与开发/生产库 `molly` 互相影响。运行测试前请确保 TiDB/MySQL 中已创建 `test` 数据库，并手动导入表结构和基础数据。
->
-> 当前 Redis 连接信息（host、port、ssl、database）在 `application.yml` 中硬编码，仅 username/password 通过环境变量注入。
-
-### 2. 初始化数据库
-
-项目已移除 Flyway，数据库表结构和基础数据需要手动导入。请先在 TiDB/MySQL 中创建对应的数据库（开发/生产使用 `molly`，测试使用 `test`），然后执行以下 SQL 文件：
-
-- `sql/init_schema.sql`：建表语句
-- `sql/init_data.sql`：初始化基础数据（含默认管理员账号）
-
-例如使用 MySQL 客户端：
-
-```bash
-mysql -h <host> -P 4000 -u <username> -p molly < sql/init_schema.sql
-mysql -h <host> -P 4000 -u <username> -p molly < sql/init_data.sql
-```
-
-### 3. 启动后端
+### 1. 启动后端
 
 ```bash
 mvn spring-boot:run
@@ -87,12 +58,20 @@ mvn spring-boot:run
 
 应用启动后默认监听 `8080` 端口。
 
+> 项目已移除外部 MySQL 与 Redis 依赖，开发、测试、生产均使用内嵌 H2 数据库（MySQL 兼容模式）。
+>
+> - 开发环境：H2 文件库，数据持久化到 `./data/molly-dev`
+> - 测试环境：H2 内存库 `molly-test`，每次测试独立初始化
+> - 生产环境：H2 文件库，数据持久化到 `./data/molly-prod`
+>
+> 表结构与基础数据由 `sql/init_schema.sql` 和 `sql/init_data.sql` 提供，应用启动时通过 `spring.sql.init` 自动导入。
+
 默认超级管理员账号：
 
 - 用户名：`admin`
 - 密码：`admin123`
 
-### 3. 访问系统
+### 2. 访问系统
 
 打开浏览器访问 `http://localhost:8080`，会自动跳转到登录页。
 
@@ -174,11 +153,11 @@ molly
 │   └── test/
 │       ├── java/com/demo/molly/            # 测试类
 │       │   ├── service/
-│       │   │   └── RedisServiceTest.java
+│       │   │   └── TokenCacheServiceTest.java
 │       │   └── MollyApplicationTests.java
 │       └── resources/
 │           ├── application.yml             # 测试默认激活 test profile
-│           └── application-test.yml        # 测试环境数据源（test 库）
+│           └── application-test.yml        # 测试环境数据源（H2 内存库）
 ├── sql/
 │   ├── init_schema.sql                      # 建表语句
 │   └── init_data.sql                        # 初始化基础数据
@@ -193,7 +172,7 @@ mvn clean package -DskipTests
 java -jar target/molly-0.0.1-SNAPSHOT.jar
 ```
 
-生产环境建议通过环境变量注入数据库账号、Redis 密码等敏感信息。
+生产环境默认使用 H2 文件库（`./data/molly-prod`），启动后会自动初始化表结构和基础数据。
 
 ## 许可证
 
