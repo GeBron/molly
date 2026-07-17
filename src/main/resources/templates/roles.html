@@ -112,9 +112,6 @@
   </div>
 </div>
 
-  <script th:inline="javascript">
-    const initialData = /*[[${initialData}]]*/ { list: [], total: 0 };
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
@@ -122,7 +119,6 @@
     let roleTable;
     let currentRoleId = null;
     let permissionTree = [];
-    let isFirstLoad = true;
     const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
     const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
 
@@ -155,16 +151,6 @@
           url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
         },
         ajax: function (data, callback) {
-          if (isFirstLoad) {
-            isFirstLoad = false;
-            callback({
-              draw: data.draw,
-              recordsTotal: initialData.total,
-              recordsFiltered: initialData.total,
-              data: initialData.list || []
-            });
-            return;
-          }
           const params = {
             pageNum: (data.start / data.length) + 1,
             pageSize: data.length,

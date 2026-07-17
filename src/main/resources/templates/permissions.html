@@ -98,14 +98,11 @@
   </div>
 </div>
 
-  <script th:inline="javascript">
-    const initialData = /*[[${initialData}]]*/ [];
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
   <script>
     let permTable;
-    let permissionTree = initialData || [];
+    let permissionTree = [];
     const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
 
     const typeLabels = { 1: '目录', 2: '菜单', 3: '按钮', 4: '接口' };
@@ -278,7 +275,9 @@
     }
 
     $(function () {
-      renderTable();
+      loadPermissions().done(function () {
+        renderTable();
+      });
 
       $('#btn-create').on('click', openCreate);
       $('#btn-save').on('click', savePerm);
