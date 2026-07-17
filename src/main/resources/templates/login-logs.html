@@ -36,6 +36,19 @@
               <th>时间</th>
             </tr>
           </thead>
+          <tbody>
+            <tr th:each="log : ${initialData.list}">
+              <td th:text="${log.username} ?: '-'">用户名</td>
+              <td th:text="${log.ip} ?: '-'">IP</td>
+              <td th:text="${log.operation} ?: '-'">操作</td>
+              <td th:data-status="${log.status}">
+                <span th:if="${log.status == 'SUCCESS'}" class="badge text-bg-success">成功</span>
+                <span th:unless="${log.status == 'SUCCESS'}" class="badge text-bg-danger">失败</span>
+              </td>
+              <td th:text="${log.message} ?: '-'">消息</td>
+              <td th:text="${@templateHelper.formatDateTime(log.createdAt)}">时间</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -45,7 +58,7 @@
   <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js"></script>
-  <script>
+  <script th:inline="javascript">
     let logTable;
     let datePicker;
 
@@ -53,6 +66,7 @@
       logTable = $('#log-table').DataTable({
         processing: true,
         serverSide: true,
+        deferLoading: [[${initialData.total}]],
         searching: false,
         ordering: false,
         pageLength: 10,
@@ -82,9 +96,9 @@
           });
         },
         columns: [
-          { data: 'username', defaultContent: '-' },
-          { data: 'ip', defaultContent: '-' },
-          { data: 'operation' },
+          { data: 'username', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+          { data: 'ip', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+          { data: 'operation', render: function (data) { return escapeHtml(data); } },
           {
             data: 'status',
             render: function (data) {
@@ -93,7 +107,7 @@
                 : '<span class="badge text-bg-danger">失败</span>';
             }
           },
-          { data: 'message', defaultContent: '-' },
+          { data: 'message', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
           {
             data: 'createdAt',
             render: function (data) { return formatDateTime(data); }

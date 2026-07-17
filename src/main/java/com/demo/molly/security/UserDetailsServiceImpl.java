@@ -67,20 +67,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             tokenCacheService.cacheUserPermissions(user.getId(), permissions);
         }
 
-        permissions = permissions.stream()
-                .map(this::toAuthorityCode)
-                .distinct()
-                .collect(Collectors.toList());
-
         return new LoginUser(user, roles, permissions);
-    }
-
-    private String toAuthorityCode(String permCode) {
-        if (permCode == null) {
-            return null;
-        }
-        return permCode.replaceFirst("^system:", "")
-                .replace("login-log", "loginLog")
-                .replace("operation-log", "operationLog");
     }
 }

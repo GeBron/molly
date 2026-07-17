@@ -18,10 +18,13 @@
         id, role_code, role_name, status, deleted, created_at, updated_at, created_by, updated_by
     </sql>
 
-    <select id="findById" resultMap="RoleResult">
-        SELECT <include refid="roleColumns"/>
-        FROM sys_role
-        WHERE id = #{id} AND deleted = 0
+    <select id="findById" resultMap="RoleWithPermissionsResult">
+        SELECT r.id, r.role_code, r.role_name, r.status, r.deleted,
+               r.created_at, r.updated_at, r.created_by, r.updated_by,
+               rp.permission_id
+        FROM sys_role r
+        LEFT JOIN sys_role_permission rp ON r.id = rp.role_id
+        WHERE r.id = #{id} AND r.deleted = 0
     </select>
 
     <select id="findByCode" resultMap="RoleResult">
@@ -61,19 +64,27 @@
         WHERE id = #{id}
     </update>
 
+    <resultMap id="RoleWithPermissionsResult" type="com.demo.molly.entity.Role" extends="RoleResult">
+        <collection property="permissionIds" ofType="java.lang.Long" resultMap="PermissionIdResult"/>
+    </resultMap>
+
+    <resultMap id="PermissionIdResult" type="java.lang.Long">
+        <result column="permission_id"/>
+    </resultMap>
+
     <select id="selectList" resultMap="RoleResult">
         SELECT <include refid="roleColumns"/>
-        FROM sys_role
+        FROM sys_role r
         <where>
-            deleted = 0
+            r.deleted = 0
             <if test="roleName != null and roleName != ''">
-                AND role_name LIKE CONCAT('%', #{roleName}, '%')
+                AND r.role_name LIKE CONCAT('%', #{roleName}, '%')
             </if>
             <if test="status != null">
-                AND status = #{status}
+                AND r.status = #{status}
             </if>
         </where>
-        ORDER BY created_at DESC
+        ORDER BY r.created_at DESC
     </select>
 
     <select id="selectByUserId" resultMap="RoleResult">

@@ -19,6 +19,7 @@
         <table class="table table-bordered table-striped" id="perm-table" style="width:100%">
           <thead>
             <tr>
+              <th style="display:none;">ID</th>
               <th>权限名称</th>
               <th>权限编码</th>
               <th>类型</th>
@@ -28,7 +29,30 @@
               <th>操作</th>
             </tr>
           </thead>
+          <tbody>
+            <th:block th:replace="~{::permRows(${initialData}, 0)}"></th:block>
+          </tbody>
         </table>
+
+        <th:block th:fragment="permRows(nodes, level)">
+          <th:block th:each="node : ${nodes}">
+            <tr>
+              <td style="display:none;" th:text="${node.id}">ID</td>
+              <td th:style="${level > 0} ? |padding-left: ${level * 20}px| : ''" th:text="${node.permName}">权限名称</td>
+              <td th:text="${node.permCode}">权限编码</td>
+              <td th:text="${node.type}">2</td>
+              <td th:text="${node.path} ?: '-'">路径</td>
+              <td th:text="${node.sort}">排序</td>
+              <td th:text="${node.status}">1</td>
+              <td>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="permission:update" th:data-id="${node.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="permission:update" th:data-id="${node.id}" th:data-status="${node.status}" th:text="${node.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-danger btn-delete" data-perm="permission:delete" th:data-id="${node.id}">删除</button>
+              </td>
+            </tr>
+            <th:block th:if="${!#lists.isEmpty(node.children)}" th:replace="~{::permRows(${node.children}, ${level + 1})}"></th:block>
+          </th:block>
+        </th:block>
       </div>
   </div>
 
@@ -131,7 +155,7 @@
       const indent = '&nbsp;&nbsp;'.repeat(level);
       nodes.forEach(function (node) {
         if (node.id !== currentId) {
-          html += '<option value="' + node.id + '">' + indent + node.permName + '</option>';
+          html += '<option value="' + node.id + '">' + indent + escapeHtml(node.permName) + '</option>';
         }
         if (node.children && node.children.length > 0) {
           html += buildParentOptions(node.children, level + 1, currentId);
@@ -146,28 +170,29 @@
         ordering: false,
         paging: false,
         info: false,
-        data: flattenPermissions(permissionTree, 0),
         columns: [
+          { data: 'id', visible: false },
           {
             data: 'permName',
             render: function (data, type, row) {
               const indent = '&nbsp;&nbsp;'.repeat(row.level || 0);
-              return indent + data;
+              return indent + escapeHtml(data);
             }
           },
-          { data: 'permCode' },
+          { data: 'permCode', render: function (data) { return escapeHtml(data); } },
           {
             data: 'type',
             render: function (data) {
-              return '<span class="badge ' + (typeBadges[data] || 'text-bg-secondary') + '">' + (typeLabels[data] || data) + '</span>';
+              const type = parseInt(data, 10);
+              return '<span class="badge ' + (typeBadges[type] || 'text-bg-secondary') + '">' + escapeHtml(typeLabels[type] || data) + '</span>';
             }
           },
-          { data: 'path', defaultContent: '-' },
+          { data: 'path', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
           { data: 'sort' },
           {
             data: 'status',
             render: function (data) {
-              return data === 1
+              return data == 1
                 ? '<span class="badge text-bg-success">启用</span>'
                 : '<span class="badge text-bg-danger">禁用</span>';
             }
@@ -177,7 +202,7 @@
             render: function (data) {
               let html = '';
               html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="permission:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="permission:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status === 1 ? '禁用' : '启用') + '</button>';
+              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="permission:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
               html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="permission:delete" data-id="' + data.id + '">删除</button>';
               return html;
             }
@@ -237,12 +262,14 @@
       const path = $('#perm-path').val().trim();
       const sort = parseInt($('#perm-sort').val(), 10) || 0;
       const status = parseInt($('input[name="perm-status"]:checked').val(), 10);
+      const btn = $('#btn-save');
 
       if (!permCode || !permName) {
         showToast('请输入权限编码和名称', 'error');
         return;
       }
 
+      setButtonLoading(btn, true);
       const data = { permCode: permCode, permName: permName, type: type, parentId: parentId, path: path, sort: sort, status: status };
       let req;
       if (id) {
@@ -254,6 +281,8 @@
         showToast('保存成功', 'success');
         permModal.hide();
         refreshTable();
+      }).always(function () {
+        setButtonLoading(btn, false);
       });
     }
 

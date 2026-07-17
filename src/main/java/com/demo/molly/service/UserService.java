@@ -10,9 +10,7 @@ import com.github.pagehelper.PageInfo;
 import com.demo.molly.entity.Role;
 import com.demo.molly.entity.User;
 import com.demo.molly.exception.BusinessException;
-import com.demo.molly.mapper.RoleMapper;
 import com.demo.molly.mapper.UserMapper;
-import com.demo.molly.service.TokenCacheService;
 import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,22 +29,19 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserMapper userMapper;
-    private final RoleMapper roleMapper;
     private final PasswordEncoder passwordEncoder;
     private final TokenCacheService tokenCacheService;
 
     @Autowired
-    public UserService(UserMapper userMapper, RoleMapper roleMapper, PasswordEncoder passwordEncoder, TokenCacheService tokenCacheService) {
+    public UserService(UserMapper userMapper, PasswordEncoder passwordEncoder, TokenCacheService tokenCacheService) {
         this.userMapper = userMapper;
-        this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
         this.tokenCacheService = tokenCacheService;
     }
 
     public PageResult<UserVO> list(UserQueryDTO query) {
-        PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<User> users = userMapper.selectList(query.username(), query.status());
-        PageInfo<User> pageInfo = new PageInfo<>(users);
+        PageInfo<User> pageInfo = PageHelper.startPage(query.getPageNum(), query.getPageSize())
+                .doSelectPageInfo(() -> userMapper.selectList(query.username(), query.status()));
 
         List<UserVO> list = pageInfo.getList().stream().map(this::toVO).collect(Collectors.toList());
         return new PageResult<>(list, pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize());
@@ -124,9 +120,11 @@ public class UserService {
     }
 
     private UserVO toVO(User user) {
-        List<Role> roles = roleMapper.selectByUserId(user.getId());
-        List<Long> roleIds = roles.stream().map(Role::getId).collect(Collectors.toList());
-        List<String> roleNames = roles.stream().map(Role::getRoleName).collect(Collectors.toList());
+        List<Role> roles = user.getRoles();
+        List<Long> roleIds = roles == null ? Collections.emptyList()
+                : roles.stream().map(Role::getId).collect(Collectors.toList());
+        List<String> roleNames = roles == null ? Collections.emptyList()
+                : roles.stream().map(Role::getRoleName).collect(Collectors.toList());
         return new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), roleIds, roleNames);
     }
 }

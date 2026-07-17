@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,13 +39,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            )
             .cors(cors -> cors.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeRequests(auth -> auth
                 .antMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.svg", "/error").permitAll()
                 .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":200,\"message\":\"退出成功\",\"data\":null}");
+                })
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(authenticationEntryPoint())
@@ -78,9 +90,13 @@ public class SecurityConfig {
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, accessDeniedException) -> {
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(403);
-            response.getWriter().write("{\"code\":403,\"message\":\"没有权限访问该资源\",\"data\":null}");
+            if (isAjaxRequest(request)) {
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(403);
+                response.getWriter().write("{\"code\":403,\"message\":\"没有权限访问该资源\",\"data\":null}");
+            } else {
+                response.sendRedirect("/dashboard");
+            }
         };
     }
 }

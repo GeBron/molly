@@ -38,6 +38,7 @@
         <table class="table table-bordered table-striped" id="user-table" style="width:100%">
           <thead>
             <tr>
+              <th style="display:none;">ID</th>
               <th>用户名</th>
               <th>真实姓名</th>
               <th>状态</th>
@@ -46,6 +47,22 @@
               <th>操作</th>
             </tr>
           </thead>
+          <tbody>
+            <tr th:each="user : ${initialData.list}">
+              <td style="display:none;" th:text="${user.id}">ID</td>
+              <td th:text="${user.username}">用户名</td>
+              <td th:text="${user.realName} ?: '-'">真实姓名</td>
+              <td th:text="${user.status}">1</td>
+              <td th:text="${#lists.isEmpty(user.roleNames)} ? '-' : ${#strings.listJoin(user.roleNames, ', ')}">角色</td>
+              <td th:text="${@templateHelper.formatDateTime(user.createdAt)}">创建时间</td>
+              <td>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="user:update" th:data-id="${user.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="user:update" th:data-id="${user.id}" th:data-status="${user.status}" th:text="${user.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-outline-info me-1 btn-roles" data-perm="user:create" th:data-id="${user.id}">分配角色</button>
+                <button class="btn btn-sm btn-danger btn-delete" data-perm="user:delete" th:data-id="${user.id}">删除</button>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -118,7 +135,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script>
+  <script th:inline="javascript">
     let userTable;
     let currentUserId = null;
     let allRoles = [];
@@ -135,6 +152,7 @@
       userTable = $('#user-table').DataTable({
         processing: true,
         serverSide: true,
+        deferLoading: [[${initialData.total}]],
         searching: false,
         ordering: false,
         pageLength: 10,
@@ -161,12 +179,13 @@
           });
         },
         columns: [
-          { data: 'username' },
-          { data: 'realName', defaultContent: '-' },
+          { data: 'id', visible: false },
+          { data: 'username', render: function (data) { return escapeHtml(data); } },
+          { data: 'realName', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
           {
             data: 'status',
             render: function (data) {
-              return data === 1
+              return data == 1
                 ? '<span class="badge text-bg-success">启用</span>'
                 : '<span class="badge text-bg-danger">禁用</span>';
             }
@@ -174,7 +193,11 @@
           {
             data: 'roleNames',
             render: function (data) {
-              return data && data.length > 0 ? data.join(', ') : '-';
+              if (!data) return '-';
+              if (Array.isArray(data)) {
+                return data.length > 0 ? escapeHtml(data.join(', ')) : '-';
+              }
+              return escapeHtml(String(data));
             }
           },
           {
@@ -186,7 +209,7 @@
             render: function (data) {
               let html = '';
               html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="user:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="user:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status === 1 ? '禁用' : '启用') + '</button>';
+              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="user:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
               html += '<button class="btn btn-sm btn-outline-info me-1 btn-roles" data-perm="user:create" data-id="' + data.id + '">分配角色</button>';
               html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="user:delete" data-id="' + data.id + '">删除</button>';
               return html;
@@ -234,6 +257,7 @@
       const password = $('#user-password').val();
       const realName = $('#user-real-name').val().trim();
       const status = parseInt($('input[name="user-status"]:checked').val(), 10);
+      const btn = $('#btn-save');
 
       if (!username) {
         showToast('请输入用户名', 'error');
@@ -244,6 +268,7 @@
         return;
       }
 
+      setButtonLoading(btn, true);
       let req;
       if (id) {
         req = ajaxRequest({ path: '/users/' + id, type: 'PUT', data: { realName: realName, status: status } });
@@ -254,6 +279,8 @@
         showToast('保存成功', 'success');
         userModal.hide();
         userTable.ajax.reload();
+      }).always(function () {
+        setButtonLoading(btn, false);
       });
     }
 
@@ -281,7 +308,7 @@
         const selected = user.roleIds || [];
         const select = $('#role-select').empty();
         allRoles.forEach(function (role) {
-          const option = $('<option></option>').val(role.id).text(role.roleName + ' (' + role.roleCode + ')');
+          const option = $('<option></option>').val(role.id).text(escapeHtml(role.roleName) + ' (' + escapeHtml(role.roleCode) + ')');
           if (selected.includes(role.id)) {
             option.prop('selected', true);
           }
@@ -293,10 +320,14 @@
 
     function saveAssignRoles() {
       const roleIds = $('#role-select').val().map(Number);
+      const btn = $('#btn-save-roles');
+      setButtonLoading(btn, true);
       ajaxRequest({ path: '/users/' + currentUserId + '/roles', type: 'POST', data: { roleIds: roleIds } }).done(function () {
         showToast('分配成功', 'success');
         roleModal.hide();
         userTable.ajax.reload();
+      }).always(function () {
+        setButtonLoading(btn, false);
       });
     }
 

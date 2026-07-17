@@ -10,8 +10,12 @@ import com.demo.molly.dto.UserQueryDTO;
 import com.demo.molly.service.UserService;
 import com.demo.molly.vo.UserVO;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,11 +23,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户管理控制器
  */
+@Validated
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -74,7 +80,8 @@ public class UserController {
     @OperationLog(module = "用户管理", operation = "修改用户状态")
     @PreAuthorize("hasAuthority('user:update')")
     @PutMapping("/{id}/status")
-    public Result<Void> updateStatus(@PathVariable Long id, Integer status) {
+    public Result<Void> updateStatus(@PathVariable Long id,
+                                     @RequestParam @Min(value = 0, message = "状态值不合法") @Max(value = 1, message = "状态值不合法") Integer status) {
         userService.updateStatus(id, status);
         return Result.success();
     }

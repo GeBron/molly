@@ -32,12 +32,6 @@ public class AuthController {
         return Result.success(authService.login(dto, request));
     }
 
-    @PostMapping("/logout")
-    public Result<Void> logout(HttpServletRequest request) {
-        authService.logout(request);
-        return Result.success();
-    }
-
     @GetMapping("/info")
     public Result<UserInfoVO> info() {
         return Result.success(authService.getUserInfo());
