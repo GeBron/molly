@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.molly.mapper.DictTypeMapper">
+
+    <resultMap id="DictTypeResult" type="com.demo.molly.entity.DictType">
+        <id property="id" column="id"/>
+        <result property="dictName" column="dict_name"/>
+        <result property="dictType" column="dict_type"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <sql id="dictTypeColumns">
+        id, dict_name, dict_type, status, remark, deleted, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findById" resultMap="DictTypeResult">
+        SELECT <include refid="dictTypeColumns"/>
+        FROM sys_dict_type
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="findByType" resultMap="DictTypeResult">
+        SELECT <include refid="dictTypeColumns"/>
+        FROM sys_dict_type
+        WHERE dict_type = #{dictType} AND deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="DictTypeResult">
+        SELECT <include refid="dictTypeColumns"/>
+        FROM sys_dict_type
+        <where>
+            deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND (dict_name LIKE CONCAT('%', #{keyword}, '%') OR dict_type LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_dict_type (dict_name, dict_type, status, remark, deleted, created_by, updated_by)
+        VALUES (#{dictName}, #{dictType}, #{status}, #{remark}, 0, #{createdBy}, #{updatedBy})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_dict_type
+        SET dict_name = #{dictName},
+            dict_type = #{dictType},
+            status = #{status},
+            remark = #{remark},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_dict_type
+        SET status = #{status},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateDeleted">
+        UPDATE sys_dict_type
+        SET deleted = #{deleted},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.molly.mapper.UserMapper">
+
+    <resultMap id="UserResult" type="com.demo.molly.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="real_name"/>
+        <result property="status" column="status"/>
+        <result property="deleted" column="deleted"/>
+        <result property="loginFailCount" column="login_fail_count"/>
+        <result property="lockTime" column="lock_time"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <sql id="userColumns">
+        id, username, password, real_name, status, deleted, login_fail_count, lock_time, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findByUsername" resultMap="UserResult">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user
+        WHERE username = #{username} AND deleted = 0
+    </select>
+
+    <select id="findById" resultMap="UserWithRolesResult">
+        SELECT u.id, u.username, u.password, u.real_name, u.status, u.deleted,
+               u.login_fail_count, u.lock_time, u.created_at, u.updated_at, u.created_by, u.updated_by,
+               r.id AS role_id, r.role_code AS role_role_code, r.role_name AS role_role_name,
+               r.status AS role_status, r.deleted AS role_deleted,
+               r.created_at AS role_created_at, r.updated_at AS role_updated_at,
+               r.created_by AS role_created_by, r.updated_by AS role_updated_by
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0
+        WHERE u.id = #{id} AND u.deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, status, deleted, login_fail_count, lock_time, created_by, updated_by)
+        VALUES (#{username}, #{password}, #{realName}, #{status}, 0, 0, NULL, #{createdBy}, #{updatedBy})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        SET real_name = #{realName},
+            status = #{status},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_user
+        SET status = #{status},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateDeleted">
+        UPDATE sys_user
+        SET deleted = #{deleted},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateLoginFail">
+        UPDATE sys_user
+        SET login_fail_count = #{loginFailCount},
+            lock_time = #{lockTime},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <update id="resetLoginFail">
+        UPDATE sys_user
+        SET login_fail_count = 0,
+            lock_time = NULL,
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <resultMap id="UserWithRolesResult" type="com.demo.molly.projection.UserWithRoles" extends="UserResult">
+        <collection property="roles" ofType="com.demo.molly.entity.Role" resultMap="RoleResultWithPrefix"/>
+    </resultMap>
+
+    <resultMap id="UserWithRolesNestedResult" type="com.demo.molly.projection.UserWithRoles" extends="UserResult">
+        <collection property="roles" ofType="com.demo.molly.entity.Role"
+                    select="com.demo.molly.mapper.RoleMapper.selectByUserId" column="id"/>
+    </resultMap>
+
+    <resultMap id="RoleResultWithPrefix" type="com.demo.molly.entity.Role">
+        <id property="id" column="role_id"/>
+        <result property="roleCode" column="role_role_code"/>
+        <result property="roleName" column="role_role_name"/>
+        <result property="status" column="role_status"/>
+        <result property="deleted" column="role_deleted"/>
+        <result property="createdAt" column="role_created_at"/>
+        <result property="updatedAt" column="role_updated_at"/>
+        <result property="createdBy" column="role_created_by"/>
+        <result property="updatedBy" column="role_updated_by"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="UserWithRolesResult">
+        SELECT u.id, u.username, u.password, u.real_name, u.status, u.deleted,
+               u.login_fail_count, u.lock_time, u.created_at, u.updated_at, u.created_by, u.updated_by,
+               r.id AS role_id, r.role_code AS role_role_code, r.role_name AS role_role_name,
+               r.status AS role_status, r.deleted AS role_deleted,
+               r.created_at AS role_created_at, r.updated_at AS role_updated_at,
+               r.created_by AS role_created_by, r.updated_by AS role_updated_by
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0
+        <where>
+            u.deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND u.username LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="status != null">
+                AND u.status = #{status}
+            </if>
+        </where>
+        ORDER BY u.created_at DESC
+    </select>
+
+    <select id="selectRoleIdsByUserId" resultType="long">
+        SELECT role_id FROM sys_user_role WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectUserIdsByRoleId" resultType="long">
+        SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}
+    </select>
+
+    <insert id="insertUserRoles">
+        INSERT INTO sys_user_role (user_id, role_id, created_by, updated_by) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId}, #{createdBy}, #{updatedBy})
+        </foreach>
+    </insert>
+
+    <delete id="deleteUserRolesByUserId">
+        DELETE FROM sys_user_role WHERE user_id = #{userId}
+    </delete>
+</mapper>

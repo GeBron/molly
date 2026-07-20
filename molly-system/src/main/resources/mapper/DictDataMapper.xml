@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.molly.mapper.DictDataMapper">
+
+    <resultMap id="DictDataResult" type="com.demo.molly.entity.DictData">
+        <id property="id" column="id"/>
+        <result property="dictType" column="dict_type"/>
+        <result property="dictLabel" column="dict_label"/>
+        <result property="dictValue" column="dict_value"/>
+        <result property="sort" column="sort"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <sql id="dictDataColumns">
+        id, dict_type, dict_label, dict_value, sort, is_default, status, remark, deleted, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findById" resultMap="DictDataResult">
+        SELECT <include refid="dictDataColumns"/>
+        FROM sys_dict_data
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByType" resultMap="DictDataResult">
+        SELECT <include refid="dictDataColumns"/>
+        FROM sys_dict_data
+        WHERE dict_type = #{dictType} AND deleted = 0
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <select id="selectList" resultMap="DictDataResult">
+        SELECT <include refid="dictDataColumns"/>
+        FROM sys_dict_data
+        <where>
+            deleted = 0
+            <if test="dictType != null and dictType != ''">
+                AND dict_type = #{dictType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_dict_data (dict_type, dict_label, dict_value, sort, is_default, status, remark, deleted, created_by, updated_by)
+        VALUES (#{dictType}, #{dictLabel}, #{dictValue}, #{sort}, #{isDefault}, #{status}, #{remark}, 0, #{createdBy}, #{updatedBy})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_dict_data
+        SET dict_type = #{dictType},
+            dict_label = #{dictLabel},
+            dict_value = #{dictValue},
+            sort = #{sort},
+            is_default = #{isDefault},
+            status = #{status},
+            remark = #{remark},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_dict_data
+        SET status = #{status},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateDeleted">
+        UPDATE sys_dict_data
+        SET deleted = #{deleted},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+</mapper>
