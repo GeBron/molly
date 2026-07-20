@@ -16,6 +16,7 @@ public class TokenCacheService {
 
     private static final String USER_PERMISSIONS_CACHE = "user:permissions";
     private static final String USER_ROLES_CACHE = "user:roles";
+    private static final String USER_INFO_CACHE = "user:info";
 
     @CachePut(value = USER_PERMISSIONS_CACHE, key = "#userId")
     public List<String> cacheUserPermissions(Long userId, List<String> permissions) {
@@ -47,8 +48,17 @@ public class TokenCacheService {
 
     @Caching(evict = {
             @CacheEvict(value = USER_PERMISSIONS_CACHE, key = "#userId"),
-            @CacheEvict(value = USER_ROLES_CACHE, key = "#userId")
+            @CacheEvict(value = USER_ROLES_CACHE, key = "#userId"),
+            @CacheEvict(value = USER_INFO_CACHE, key = "#userId")
     })
     public void clearUserCache(Long userId) {
+    }
+
+    @Caching(evict = {
+            @CacheEvict(value = USER_PERMISSIONS_CACHE, allEntries = true),
+            @CacheEvict(value = USER_ROLES_CACHE, allEntries = true),
+            @CacheEvict(value = USER_INFO_CACHE, allEntries = true)
+    })
+    public void clearAllUserCaches() {
     }
 }

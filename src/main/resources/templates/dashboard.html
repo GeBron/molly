@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head(~{::title}, ~{::link})">
-  <title>仪表盘 - Molly Admin</title>
-  <link href="/css/style.css" rel="stylesheet">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>仪表盘</title>
 </head>
-<body th:replace="layout :: body(~{::.content}, ~{::script})">
-  <div class="content">
+<body>
+  <div layout:fragment="content">
     <div class="row g-4">
       <div class="col-12">
         <div class="card">
@@ -42,9 +43,5 @@
       </div>
     </div>
   </div>
-
-  <script>
-    // 用户信息已由服务端渲染，无需额外 AJAX 请求
-  </script>
 </body>
 </html>

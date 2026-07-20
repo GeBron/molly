@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -133,6 +134,7 @@ public class AuthService {
         return buildUserInfo(loginUser);
     }
 
+    @Cacheable(value = "user:info", key = "#loginUser.getUser().getId()")
     private UserInfoVO buildUserInfo(LoginUser loginUser) {
         User user = loginUser.getUser();
         UserVO userVO = new UserVO(user.getId(), user.getUsername(), user.getRealName(), user.getStatus(), user.getCreatedAt(), null, null);

@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head(~{::title}, ~{::link})">
-  <title>用户管理 - Molly Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <link href="/css/style.css" rel="stylesheet">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+  <title>用户管理</title>
+  <th:block layout:fragment="page-styles">
+    <link rel="stylesheet" th:href="@{/webjars/datatables/css/dataTables.bootstrap5.min.css}">
+  </th:block>
 </head>
-<body th:replace="layout :: body(~{::.content}, ~{::script})">
-  <div class="content">
+<body>
+  <div layout:fragment="content">
     <div class="card mb-4">
       <div class="card-body">
         <form class="row g-3 align-items-end" id="query-form">
@@ -26,7 +30,7 @@
             <button type="submit" class="btn btn-primary">查询</button>
             <button type="button" class="btn btn-outline-secondary" id="btn-reset">重置</button>
           </div>
-          <div class="col-auto" data-perm="user:create">
+          <div class="col-auto" sec:authorize="hasAuthority('user:create')">
             <button type="button" class="btn btn-success" id="btn-create">新增</button>
           </div>
         </form>
@@ -56,10 +60,10 @@
               <td th:text="${#lists.isEmpty(user.roleNames)} ? '-' : ${#strings.listJoin(user.roleNames, ', ')}">角色</td>
               <td th:text="${@templateHelper.formatDateTime(user.createdAt)}">创建时间</td>
               <td>
-                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="user:update" th:data-id="${user.id}">编辑</button>
-                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="user:update" th:data-id="${user.id}" th:data-status="${user.status}" th:text="${user.status == 1} ? '禁用' : '启用'">禁用</button>
-                <button class="btn btn-sm btn-outline-info me-1 btn-roles" data-perm="user:create" th:data-id="${user.id}">分配角色</button>
-                <button class="btn btn-sm btn-danger btn-delete" data-perm="user:delete" th:data-id="${user.id}">删除</button>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" sec:authorize="hasAuthority('user:update')" th:data-id="${user.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" sec:authorize="hasAuthority('user:update')" th:data-id="${user.id}" th:data-status="${user.status}" th:text="${user.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-outline-info me-1 btn-roles" sec:authorize="hasAuthority('user:create')" th:data-id="${user.id}">分配角色</button>
+                <button class="btn btn-sm btn-danger btn-delete" sec:authorize="hasAuthority('user:delete')" th:data-id="${user.id}">删除</button>
               </td>
             </tr>
           </tbody>
@@ -69,307 +73,312 @@
 
     <!-- User Modal -->
     <div class="modal fade" id="user-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="user-modal-title">新增用户</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="user-form">
-            <input type="hidden" id="user-id">
-            <div class="mb-3">
-              <label class="form-label">用户名</label>
-              <input type="text" class="form-control" id="user-username" required>
-            </div>
-            <div class="mb-3" id="password-group">
-              <label class="form-label">密码</label>
-              <input type="password" class="form-control" id="user-password" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">真实姓名</label>
-              <input type="text" class="form-control" id="user-real-name">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">状态</label>
-              <div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="user-status" id="status-enable" value="1" checked>
-                  <label class="form-check-label" for="status-enable">启用</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="user-status" id="status-disable" value="0">
-                  <label class="form-check-label" for="status-disable">禁用</label>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="user-modal-title">新增用户</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="user-form">
+              <input type="hidden" id="user-id">
+              <div class="mb-3">
+                <label class="form-label">用户名</label>
+                <input type="text" class="form-control" id="user-username" required>
+              </div>
+              <div class="mb-3" id="password-group">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-control" id="user-password" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">真实姓名</label>
+                <input type="text" class="form-control" id="user-real-name">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">状态</label>
+                <div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="user-status" id="status-enable" value="1" checked>
+                    <label class="form-check-label" for="status-enable">启用</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="user-status" id="status-disable" value="0">
+                    <label class="form-check-label" for="status-disable">禁用</label>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="btn-save">保存</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Role Assign Modal -->
-  <div class="modal fade" id="role-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">分配角色</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div id="role-select" class="role-check-list"></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="btn-save-roles">保存</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-save">保存</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script th:inline="javascript">
-    let userTable;
-    let currentUserId = null;
-    let allRoles = [];
-    const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
-    const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
+    <!-- Role Assign Modal -->
+    <div class="modal fade" id="role-modal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">分配角色</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="role-select" class="role-check-list"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-save-roles">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function loadRoles() {
-      if (allRoles && allRoles.length > 0) {
-        return $.Deferred().resolve({ data: { list: allRoles } }).promise();
-      }
-      return ajaxRequest({ path: '/roles', type: 'GET', data: { pageNum: 1, pageSize: 9999 } }).done(function (res) {
-        allRoles = res.data.list || [];
-      });
-    }
+    <th:block layout:fragment="page-scripts">
+      <script th:src="@{/webjars/datatables/js/jquery.dataTables.min.js}"></script>
+      <script th:src="@{/webjars/datatables/js/dataTables.bootstrap5.min.js}"></script>
+      <script th:inline="javascript">
+        let userTable;
+        let currentUserId = null;
+        let allRoles = [];
+        const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
+        const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
 
-    function renderTable() {
-      userTable = $('#user-table').DataTable({
-        processing: true,
-        serverSide: true,
-        deferLoading: [[${initialData.total}]],
-        searching: false,
-        ordering: false,
-        pageLength: 10,
-        lengthMenu: [10, 20, 50],
-        language: {
-          url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
-        },
-        ajax: function (data, callback) {
-          const params = {
-            pageNum: (data.start / data.length) + 1,
-            pageSize: data.length,
-            username: $('#query-username').val(),
-            status: $('#query-status').val()
-          };
-          ajaxRequest({ path: '/users', type: 'GET', data: params }).done(function (res) {
-            callback({
-              draw: data.draw,
-              recordsTotal: res.data.total,
-              recordsFiltered: res.data.total,
-              data: res.data.list
-            });
-          }).fail(function () {
-            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
-          });
-        },
-        columns: [
-          { data: 'id', visible: false },
-          { data: 'username', render: function (data) { return escapeHtml(data); } },
-          { data: 'realName', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
-          {
-            data: 'status',
-            render: function (data) {
-              return data == 1
-                ? '<span class="badge text-bg-success">启用</span>'
-                : '<span class="badge text-bg-danger">禁用</span>';
-            }
-          },
-          {
-            data: 'roleNames',
-            render: function (data) {
-              if (!data) return '-';
-              if (Array.isArray(data)) {
-                return data.length > 0 ? escapeHtml(data.join(', ')) : '-';
-              }
-              return escapeHtml(String(data));
-            }
-          },
-          {
-            data: 'createdAt',
-            render: function (data) { return formatDateTime(data); }
-          },
-          {
-            data: null,
-            render: function (data) {
-              let html = '';
-              html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="user:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="user:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
-              html += '<button class="btn btn-sm btn-outline-info me-1 btn-roles" data-perm="user:create" data-id="' + data.id + '">分配角色</button>';
-              html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="user:delete" data-id="' + data.id + '">删除</button>';
-              return html;
-            }
+        function loadRoles() {
+          if (allRoles && allRoles.length > 0) {
+            return $.Deferred().resolve({ data: { list: allRoles } }).promise();
           }
-        ],
-        drawCallback: function () {
-          applyPermission();
+          return ajaxRequest({ path: '/roles', type: 'GET', data: { pageNum: 1, pageSize: 9999 } }).done(function (res) {
+            allRoles = res.data.list || [];
+          });
         }
-      });
-    }
 
-    function openCreate() {
-      $('#user-modal-title').text('新增用户');
-      $('#user-id').val('');
-      $('#user-username').val('').prop('disabled', false);
-      $('#user-password').val('').prop('required', true);
-      $('#password-group').show();
-      $('#user-real-name').val('');
-      $('#status-enable').prop('checked', true);
-      userModal.show();
-    }
+        function renderTable() {
+          userTable = $('#user-table').DataTable({
+            processing: true,
+            serverSide: true,
+            deferLoading: [[${initialData.total}]],
+            searching: false,
+            ordering: false,
+            pageLength: 10,
+            lengthMenu: [10, 20, 50],
+            language: {
+              url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
+            },
+            ajax: function (data, callback) {
+              const params = {
+                pageNum: (data.start / data.length) + 1,
+                pageSize: data.length,
+                username: $('#query-username').val(),
+                status: $('#query-status').val()
+              };
+              ajaxRequest({ path: '/users', type: 'GET', data: params }).done(function (res) {
+                callback({
+                  draw: data.draw,
+                  recordsTotal: res.data.total,
+                  recordsFiltered: res.data.total,
+                  data: res.data.list
+                });
+              }).fail(function () {
+                callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+              });
+            },
+            columns: [
+              { data: 'id', visible: false },
+              { data: 'username', render: function (data) { return escapeHtml(data); } },
+              { data: 'realName', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+              {
+                data: 'status',
+                render: function (data) {
+                  return data == 1
+                    ? '<span class="badge text-bg-success">启用</span>'
+                    : '<span class="badge text-bg-danger">禁用</span>';
+                }
+              },
+              {
+                data: 'roleNames',
+                render: function (data) {
+                  if (!data) return '-';
+                  if (Array.isArray(data)) {
+                    return data.length > 0 ? escapeHtml(data.join(', ')) : '-';
+                  }
+                  return escapeHtml(String(data));
+                }
+              },
+              {
+                data: 'createdAt',
+                render: function (data) { return formatDateTime(data); }
+              },
+              {
+                data: null,
+                render: function (data) {
+                  let html = '';
+                  if (hasPermission('user:update')) {
+                    html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-id="' + data.id + '">编辑</button>';
+                    html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
+                  }
+                  if (hasPermission('user:create')) {
+                    html += '<button class="btn btn-sm btn-outline-info me-1 btn-roles" data-id="' + data.id + '">分配角色</button>';
+                  }
+                  if (hasPermission('user:delete')) {
+                    html += '<button class="btn btn-sm btn-danger btn-delete" data-id="' + data.id + '">删除</button>';
+                  }
+                  return html;
+                }
+              }
+            ]
+          });
+        }
 
-    function openEdit(id) {
-      ajaxRequest({ path: '/users/' + id, type: 'GET' }).done(function (res) {
-        const user = res.data;
-        $('#user-modal-title').text('编辑用户');
-        $('#user-id').val(user.id);
-        $('#user-username').val(user.username).prop('disabled', true);
-        $('#user-password').val('').prop('required', false);
-        $('#password-group').hide();
-        $('#user-real-name').val(user.realName || '');
-        if (user.status === 1) {
+        function openCreate() {
+          $('#user-modal-title').text('新增用户');
+          $('#user-id').val('');
+          $('#user-username').val('').prop('disabled', false);
+          $('#user-password').val('').prop('required', true);
+          $('#password-group').show();
+          $('#user-real-name').val('');
           $('#status-enable').prop('checked', true);
-        } else {
-          $('#status-disable').prop('checked', true);
+          userModal.show();
         }
-        userModal.show();
-      });
-    }
 
-    function saveUser() {
-      const id = $('#user-id').val();
-      const username = $('#user-username').val().trim();
-      const password = $('#user-password').val();
-      const realName = $('#user-real-name').val().trim();
-      const status = parseInt($('input[name="user-status"]:checked').val(), 10);
-      const btn = $('#btn-save');
+        function openEdit(id) {
+          ajaxRequest({ path: '/users/' + id, type: 'GET' }).done(function (res) {
+            const user = res.data;
+            $('#user-modal-title').text('编辑用户');
+            $('#user-id').val(user.id);
+            $('#user-username').val(user.username).prop('disabled', true);
+            $('#user-password').val('').prop('required', false);
+            $('#password-group').hide();
+            $('#user-real-name').val(user.realName || '');
+            if (user.status === 1) {
+              $('#status-enable').prop('checked', true);
+            } else {
+              $('#status-disable').prop('checked', true);
+            }
+            userModal.show();
+          });
+        }
 
-      if (!username) {
-        showToast('请输入用户名', 'error');
-        return;
-      }
-      if (!id && !password) {
-        showToast('请输入密码', 'error');
-        return;
-      }
+        function saveUser() {
+          const id = $('#user-id').val();
+          const username = $('#user-username').val().trim();
+          const password = $('#user-password').val();
+          const realName = $('#user-real-name').val().trim();
+          const status = parseInt($('input[name="user-status"]:checked').val(), 10);
+          const btn = $('#btn-save');
 
-      setButtonLoading(btn, true);
-      let req;
-      if (id) {
-        req = ajaxRequest({ path: '/users/' + id, type: 'PUT', data: { realName: realName, status: status } });
-      } else {
-        req = ajaxRequest({ path: '/users', type: 'POST', data: { username: username, password: password, realName: realName, status: status } });
-      }
-      req.done(function () {
-        showToast('保存成功', 'success');
-        userModal.hide();
-        userTable.ajax.reload();
-      }).always(function () {
-        setButtonLoading(btn, false);
-      });
-    }
+          if (!username) {
+            showToast('请输入用户名', 'error');
+            return;
+          }
+          if (!id && !password) {
+            showToast('请输入密码', 'error');
+            return;
+          }
 
-    function toggleStatus(id, currentStatus) {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      ajaxRequest({ path: '/users/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
-        showToast('状态更新成功', 'success');
-        userTable.ajax.reload();
-      });
-    }
+          setButtonLoading(btn, true);
+          let req;
+          if (id) {
+            req = ajaxRequest({ path: '/users/' + id, type: 'PUT', data: { realName: realName, status: status } });
+          } else {
+            req = ajaxRequest({ path: '/users', type: 'POST', data: { username: username, password: password, realName: realName, status: status } });
+          }
+          req.done(function () {
+            showToast('保存成功', 'success');
+            userModal.hide();
+            userTable.ajax.reload();
+          }).always(function () {
+            setButtonLoading(btn, false);
+          });
+        }
 
-    function deleteUser(id) {
-      confirmDialog('确认删除该用户吗？', function () {
-        ajaxRequest({ path: '/users/' + id, type: 'DELETE' }).done(function () {
-          showToast('删除成功', 'success');
-          userTable.ajax.reload();
-        });
-      });
-    }
+        function toggleStatus(id, currentStatus) {
+          const newStatus = currentStatus === 1 ? 0 : 1;
+          ajaxRequest({ path: '/users/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
+            showToast('状态更新成功', 'success');
+            userTable.ajax.reload();
+          });
+        }
 
-    function openAssignRoles(id) {
-      currentUserId = id;
-      $.when(
-        ajaxRequest({ path: '/users/' + id, type: 'GET' }),
-        loadRoles()
-      ).done(function (userRes, roleRes) {
-        const user = userRes[0].data;
-        const selected = user.roleIds || [];
-        const container = $('#role-select').empty();
-        allRoles.forEach(function (role) {
-          const checked = selected.includes(role.id) ? 'checked' : '';
-          const item = $('<div class="form-check"></div>').html(
-            '<input class="form-check-input" type="checkbox" id="role-check-' + role.id + '" value="' + role.id + '" ' + checked + '>' +
-            '<label class="form-check-label" for="role-check-' + role.id + '">' + escapeHtml(role.roleName) + ' (' + escapeHtml(role.roleCode) + ')</label>'
-          );
-          container.append(item);
-        });
-        roleModal.show();
-      });
-    }
+        function deleteUser(id) {
+          confirmDialog('确认删除该用户吗？', function () {
+            ajaxRequest({ path: '/users/' + id, type: 'DELETE' }).done(function () {
+              showToast('删除成功', 'success');
+              userTable.ajax.reload();
+            });
+          });
+        }
 
-    function saveAssignRoles() {
-      const roleIds = [];
-      $('#role-select input[type="checkbox"]:checked').each(function () {
-        roleIds.push(parseInt($(this).val(), 10));
-      });
-      const btn = $('#btn-save-roles');
-      setButtonLoading(btn, true);
-      ajaxRequest({ path: '/users/' + currentUserId + '/roles', type: 'POST', data: { roleIds: roleIds } }).done(function () {
-        showToast('分配成功', 'success');
-        roleModal.hide();
-        userTable.ajax.reload();
-      }).always(function () {
-        setButtonLoading(btn, false);
-      });
-    }
+        function openAssignRoles(id) {
+          currentUserId = id;
+          $.when(
+            ajaxRequest({ path: '/users/' + id, type: 'GET' }),
+            loadRoles()
+          ).done(function (userRes, roleRes) {
+            const user = userRes[0].data;
+            const selected = user.roleIds || [];
+            const container = $('#role-select').empty();
+            allRoles.forEach(function (role) {
+              const checked = selected.includes(role.id) ? 'checked' : '';
+              const item = $('<div class="form-check"></div>').html(
+                '<input class="form-check-input" type="checkbox" id="role-check-' + role.id + '" value="' + role.id + '" ' + checked + '>' +
+                '<label class="form-check-label" for="role-check-' + role.id + '">' + escapeHtml(role.roleName) + ' (' + escapeHtml(role.roleCode) + ')</label>'
+              );
+              container.append(item);
+            });
+            roleModal.show();
+          });
+        }
 
-    $(function () {
-      renderTable();
+        function saveAssignRoles() {
+          const roleIds = [];
+          $('#role-select input[type="checkbox"]:checked').each(function () {
+            roleIds.push(parseInt($(this).val(), 10));
+          });
+          const btn = $('#btn-save-roles');
+          setButtonLoading(btn, true);
+          ajaxRequest({ path: '/users/' + currentUserId + '/roles', type: 'POST', data: { roleIds: roleIds } }).done(function () {
+            showToast('分配成功', 'success');
+            roleModal.hide();
+            userTable.ajax.reload();
+          }).always(function () {
+            setButtonLoading(btn, false);
+          });
+        }
 
-      $('#query-form').on('submit', function (e) {
-        e.preventDefault();
-        userTable.ajax.reload();
-      });
-      $('#btn-reset').on('click', function () {
-        $('#query-username').val('');
-        $('#query-status').val('');
-        userTable.ajax.reload();
-      });
-      $('#btn-create').on('click', openCreate);
-      $('#btn-save').on('click', saveUser);
-      $('#btn-save-roles').on('click', saveAssignRoles);
+        function initPage() {
+          renderTable();
 
-      $('#user-table').on('click', '.btn-edit', function () {
-        openEdit($(this).data('id'));
-      });
-      $('#user-table').on('click', '.btn-toggle', function () {
-        toggleStatus($(this).data('id'), $(this).data('status'));
-      });
-      $('#user-table').on('click', '.btn-roles', function () {
-        openAssignRoles($(this).data('id'));
-      });
-      $('#user-table').on('click', '.btn-delete', function () {
-        deleteUser($(this).data('id'));
-      });
-    });
-  </script>
+          $('#query-form').on('submit', function (e) {
+            e.preventDefault();
+            userTable.ajax.reload();
+          });
+          $('#btn-reset').on('click', function () {
+            $('#query-username').val('');
+            $('#query-status').val('');
+            userTable.ajax.reload();
+          });
+          $('#btn-create').on('click', openCreate);
+          $('#btn-save').on('click', saveUser);
+          $('#btn-save-roles').on('click', saveAssignRoles);
+
+          $('#user-table').on('click', '.btn-edit', function () {
+            openEdit($(this).data('id'));
+          });
+          $('#user-table').on('click', '.btn-toggle', function () {
+            toggleStatus($(this).data('id'), $(this).data('status'));
+          });
+          $('#user-table').on('click', '.btn-roles', function () {
+            openAssignRoles($(this).data('id'));
+          });
+          $('#user-table').on('click', '.btn-delete', function () {
+            deleteUser($(this).data('id'));
+          });
+        }
+      </script>
+    </th:block>
+  </div>
 </body>
 </html>

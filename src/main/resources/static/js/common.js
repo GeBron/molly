@@ -51,15 +51,6 @@ function hasPermission(perm) {
   return info.permissions.includes(perm);
 }
 
-function applyPermission() {
-  $('[data-perm]').each(function () {
-    const perm = $(this).data('perm');
-    if (!hasPermission(perm)) {
-      $(this).remove();
-    }
-  });
-}
-
 function showToast(message, type) {
   type = type || 'info';
   const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-info';
@@ -195,7 +186,7 @@ function setButtonLoading(btn, loading) {
 }
 
 function initPage() {
-  applyPermission();
+  // 页面通用初始化可在此处扩展；权限控制已由 Thymeleaf 服务端渲染
 }
 
 $(document).ajaxError(function (event, xhr) {

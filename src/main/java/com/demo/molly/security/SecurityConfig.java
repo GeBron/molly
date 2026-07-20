@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.svg", "/error").permitAll()
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.svg", "/favicon.ico", "/error").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()
             )

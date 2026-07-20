@@ -90,6 +90,7 @@ public class RoleService {
         role.setStatus(dto.getStatus());
         AuditUtil.fillUpdate(role);
         roleMapper.update(role);
+        clearUserCachesByRoleId(id);
     }
 
     @Transactional
@@ -103,6 +104,7 @@ public class RoleService {
         }
         roleMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
         roleMapper.deleteRolePermissionsByRoleId(id);
+        clearUserCachesByRoleId(id);
     }
 
     @Transactional
@@ -115,6 +117,7 @@ public class RoleService {
             throw new BusinessException("不能禁用超级管理员角色");
         }
         roleMapper.updateStatus(id, status, AuditUtil.currentUserId());
+        clearUserCachesByRoleId(id);
     }
 
     @Transactional
@@ -127,6 +130,13 @@ public class RoleService {
         if (dto.getIds() != null && !dto.getIds().isEmpty()) {
             roleMapper.insertRolePermissions(roleId, dto.getIds(), AuditUtil.currentUserId(), AuditUtil.currentUserId());
         }
+        List<Long> userIds = userMapper.selectUserIdsByRoleId(roleId);
+        for (Long userId : userIds) {
+            tokenCacheService.clearUserCache(userId);
+        }
+    }
+
+    private void clearUserCachesByRoleId(Long roleId) {
         List<Long> userIds = userMapper.selectUserIdsByRoleId(roleId);
         for (Long userId : userIds) {
             tokenCacheService.clearUserCache(userId);

@@ -57,7 +57,7 @@ public class PageController {
     @GetMapping("/")
     public String root(Model model) {
         try {
-            addLayout(model, "仪表盘", "dashboard");
+            addLayout(model, "仪表盘", "/dashboard");
             return "dashboard";
         } catch (BusinessException e) {
             if (e.getCode() == 401) {
@@ -70,7 +70,7 @@ public class PageController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         try {
-            addLayout(model, "仪表盘", "dashboard");
+            addLayout(model, "仪表盘", "/dashboard");
             return "dashboard";
         } catch (BusinessException e) {
             if (e.getCode() == 401) {
@@ -83,7 +83,7 @@ public class PageController {
     @PreAuthorize("hasAuthority('user:view')")
     @GetMapping("/users")
     public String users(Model model) {
-        addLayout(model, "用户管理", "system/user");
+        addLayout(model, "用户管理", "/users");
         PageResult<UserVO> initialData = userService.list(new KeywordStatusQuery(null, null, 1, 10));
         model.addAttribute("initialData", initialData);
         return "users";
@@ -92,7 +92,7 @@ public class PageController {
     @PreAuthorize("hasAuthority('role:view')")
     @GetMapping("/roles")
     public String roles(Model model) {
-        addLayout(model, "角色管理", "system/role");
+        addLayout(model, "角色管理", "/roles");
         PageResult<RoleVO> initialData = roleService.list(new KeywordStatusQuery(null, null, 1, 10));
         model.addAttribute("initialData", initialData);
         return "roles";
@@ -101,7 +101,7 @@ public class PageController {
     @PreAuthorize("hasAuthority('permission:view')")
     @GetMapping("/permissions")
     public String permissions(Model model) {
-        addLayout(model, "权限管理", "system/permission");
+        addLayout(model, "权限管理", "/permissions");
         List<PermissionVO> initialData = permissionService.tree();
         model.addAttribute("initialData", initialData);
         return "permissions";
@@ -110,7 +110,7 @@ public class PageController {
     @PreAuthorize("hasAuthority('loginLog:view')")
     @GetMapping("/login-logs")
     public String loginLogs(Model model) {
-        addLayout(model, "登录日志", "system/login-log");
+        addLayout(model, "登录日志", "/login-logs");
         PageResult<LoginLogVO> initialData = logService.loginLogList(new LogQueryDTO(1, 10, null, null));
         model.addAttribute("initialData", initialData);
         return "login-logs";
@@ -119,7 +119,7 @@ public class PageController {
     @PreAuthorize("hasAuthority('operationLog:view')")
     @GetMapping("/operation-logs")
     public String operationLogs(Model model) {
-        addLayout(model, "操作日志", "system/operation-log");
+        addLayout(model, "操作日志", "/operation-logs");
         PageResult<OperationLogVO> initialData = logService.operationLogList(new LogQueryDTO(1, 10, null, null));
         model.addAttribute("initialData", initialData);
         return "operation-logs";

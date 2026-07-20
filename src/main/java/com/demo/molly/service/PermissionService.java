@@ -7,6 +7,8 @@ import com.demo.molly.mapper.PermissionMapper;
 import com.demo.molly.util.AuditUtil;
 import com.demo.molly.vo.PermissionVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +26,15 @@ import java.util.Map;
 public class PermissionService {
 
     private final PermissionMapper permissionMapper;
+    private final TokenCacheService tokenCacheService;
 
     @Autowired
-    public PermissionService(PermissionMapper permissionMapper) {
+    public PermissionService(PermissionMapper permissionMapper, TokenCacheService tokenCacheService) {
         this.permissionMapper = permissionMapper;
+        this.tokenCacheService = tokenCacheService;
     }
 
+    @Cacheable(value = "permission:tree")
     public List<PermissionVO> tree() {
         List<Permission> permissions = permissionMapper.selectAll();
         return buildTree(permissions);
@@ -44,6 +49,7 @@ public class PermissionService {
     }
 
     @Transactional
+    @CacheEvict(value = "permission:tree", allEntries = true)
     public void create(PermissionDTO dto) {
         Permission exist = permissionMapper.findByCode(dto.getPermCode());
         if (exist != null) {
@@ -59,9 +65,11 @@ public class PermissionService {
         permission.setStatus(dto.getStatus() == null ? 1 : dto.getStatus());
         AuditUtil.fillCreate(permission);
         permissionMapper.insert(permission);
+        tokenCacheService.clearAllUserCaches();
     }
 
     @Transactional
+    @CacheEvict(value = "permission:tree", allEntries = true)
     public void update(Long id, PermissionDTO dto) {
         Permission permission = permissionMapper.findById(id);
         if (permission == null) {
@@ -80,24 +88,29 @@ public class PermissionService {
         permission.setStatus(dto.getStatus());
         AuditUtil.fillUpdate(permission);
         permissionMapper.update(permission);
+        tokenCacheService.clearAllUserCaches();
     }
 
     @Transactional
+    @CacheEvict(value = "permission:tree", allEntries = true)
     public void delete(Long id) {
         Permission permission = permissionMapper.findById(id);
         if (permission == null) {
             throw new BusinessException("权限不存在");
         }
         permissionMapper.updateDeleted(id, 1, AuditUtil.currentUserId());
+        tokenCacheService.clearAllUserCaches();
     }
 
     @Transactional
+    @CacheEvict(value = "permission:tree", allEntries = true)
     public void updateStatus(Long id, Integer status) {
         Permission permission = permissionMapper.findById(id);
         if (permission == null) {
             throw new BusinessException("权限不存在");
         }
         permissionMapper.updateStatus(id, status, AuditUtil.currentUserId());
+        tokenCacheService.clearAllUserCaches();
     }
 
     private List<PermissionVO> buildTree(List<Permission> permissions) {
