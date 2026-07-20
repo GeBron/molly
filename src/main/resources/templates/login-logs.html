@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head(~{::title}, ~{::link})">
-  <title>登录日志 - Molly Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
-  <link href="/css/style.css" rel="stylesheet">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>登录日志</title>
+  <th:block layout:fragment="page-styles">
+    <link rel="stylesheet" th:href="@{/webjars/datatables/css/dataTables.bootstrap5.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/flatpickr/dist/flatpickr.min.css}">
+  </th:block>
 </head>
-<body th:replace="layout :: body(~{::.content}, ~{::script})">
-  <div class="content">
+<body>
+  <div layout:fragment="content">
     <div class="card mb-4">
       <div class="card-body">
         <form class="row g-3 align-items-end" id="query-form">
@@ -49,89 +52,91 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js"></script>
-  <script th:inline="javascript">
-    let logTable;
-    let datePicker;
+    <th:block layout:fragment="page-scripts">
+      <script th:src="@{/webjars/datatables/js/jquery.dataTables.min.js}"></script>
+      <script th:src="@{/webjars/datatables/js/dataTables.bootstrap5.min.js}"></script>
+      <script th:src="@{/webjars/flatpickr/dist/flatpickr.min.js}"></script>
+      <script th:src="@{/webjars/flatpickr/dist/l10n/zh.js}"></script>
+      <script th:inline="javascript">
+        let logTable;
+        let datePicker;
 
-    function renderTable() {
-      logTable = $('#log-table').DataTable({
-        processing: true,
-        serverSide: true,
-        deferLoading: [[${initialData.total}]],
-        searching: false,
-        ordering: false,
-        pageLength: 10,
-        lengthMenu: [10, 20, 50],
-        language: {
-          url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
-        },
-        ajax: function (data, callback) {
-          const params = {
-            pageNum: (data.start / data.length) + 1,
-            pageSize: data.length
-          };
-          const range = datePicker.selectedDates;
-          if (range && range.length === 2) {
-            params.startTime = range[0].toISOString();
-            params.endTime = range[1].toISOString();
-          }
-          ajaxRequest({ path: '/logs/login', type: 'GET', data: params }).done(function (res) {
-            callback({
-              draw: data.draw,
-              recordsTotal: res.data.total,
-              recordsFiltered: res.data.total,
-              data: res.data.list
-            });
-          }).fail(function () {
-            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+        function renderTable() {
+          logTable = $('#log-table').DataTable({
+            processing: true,
+            serverSide: true,
+            deferLoading: [[${initialData.total}]],
+            searching: false,
+            ordering: false,
+            pageLength: 10,
+            lengthMenu: [10, 20, 50],
+            language: {
+              url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
+            },
+            ajax: function (data, callback) {
+              const params = {
+                pageNum: (data.start / data.length) + 1,
+                pageSize: data.length
+              };
+              const range = datePicker.selectedDates;
+              if (range && range.length === 2) {
+                params.startTime = range[0].toISOString();
+                params.endTime = range[1].toISOString();
+              }
+              ajaxRequest({ path: '/logs/login', type: 'GET', data: params }).done(function (res) {
+                callback({
+                  draw: data.draw,
+                  recordsTotal: res.data.total,
+                  recordsFiltered: res.data.total,
+                  data: res.data.list
+                });
+              }).fail(function () {
+                callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+              });
+            },
+            columns: [
+              { data: 'username', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+              { data: 'ip', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+              { data: 'operation', render: function (data) { return escapeHtml(data); } },
+              {
+                data: 'status',
+                render: function (data) {
+                  return data === 'SUCCESS'
+                    ? '<span class="badge text-bg-success">成功</span>'
+                    : '<span class="badge text-bg-danger">失败</span>';
+                }
+              },
+              { data: 'message', render: function (data) { return data ? escapeHtml(data) : '-'; } },
+              {
+                data: 'createdAt',
+                render: function (data) { return formatDateTime(data); }
+              }
+            ]
           });
-        },
-        columns: [
-          { data: 'username', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
-          { data: 'ip', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
-          { data: 'operation', render: function (data) { return escapeHtml(data); } },
-          {
-            data: 'status',
-            render: function (data) {
-              return data === 'SUCCESS'
-                ? '<span class="badge text-bg-success">成功</span>'
-                : '<span class="badge text-bg-danger">失败</span>';
-            }
-          },
-          { data: 'message', render: function (data) { return data ? escapeHtml(data) : '-'; } },
-          {
-            data: 'createdAt',
-            render: function (data) { return formatDateTime(data); }
-          }
-        ]
-      });
-    }
+        }
 
-    $(function () {
-      datePicker = flatpickr('#query-time-range', {
-        mode: 'range',
-        enableTime: true,
-        dateFormat: 'Y-m-d H:i',
-        locale: 'zh',
-        time_24hr: true
-      });
-      renderTable();
+        function initPage() {
+          datePicker = flatpickr('#query-time-range', {
+            mode: 'range',
+            enableTime: true,
+            dateFormat: 'Y-m-d H:i',
+            locale: 'zh',
+            time_24hr: true
+          });
+          renderTable();
 
-      $('#query-form').on('submit', function (e) {
-        e.preventDefault();
-        logTable.ajax.reload();
-      });
-      $('#btn-reset').on('click', function () {
-        datePicker.clear();
-        logTable.ajax.reload();
-      });
-    });
-  </script>
+          $('#query-form').on('submit', function (e) {
+            e.preventDefault();
+            logTable.ajax.reload();
+          });
+          $('#btn-reset').on('click', function () {
+            datePicker.clear();
+            logTable.ajax.reload();
+          });
+        }
+      </script>
+    </th:block>
+  </div>
 </body>
 </html>

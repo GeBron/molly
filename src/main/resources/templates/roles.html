@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head(~{::title}, ~{::link})">
-  <title>角色管理 - Molly Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/themes/default/style.min.css" rel="stylesheet">
-  <link href="/css/style.css" rel="stylesheet">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+  <title>角色管理</title>
+  <th:block layout:fragment="page-styles">
+    <link rel="stylesheet" th:href="@{/webjars/datatables/css/dataTables.bootstrap5.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/jstree/themes/default/style.min.css}">
+  </th:block>
 </head>
-<body th:replace="layout :: body(~{::.content}, ~{::script})">
-  <div class="content">
+<body>
+  <div layout:fragment="content">
     <div class="card mb-4">
       <div class="card-body">
         <form class="row g-3 align-items-end" id="query-form">
@@ -27,7 +31,7 @@
             <button type="submit" class="btn btn-primary">查询</button>
             <button type="button" class="btn btn-outline-secondary" id="btn-reset">重置</button>
           </div>
-          <div class="col-auto" data-perm="role:create">
+          <div class="col-auto" sec:authorize="hasAuthority('role:create')">
             <button type="button" class="btn btn-success" id="btn-create">新增</button>
           </div>
         </form>
@@ -55,314 +59,319 @@
               <td th:text="${role.status}">1</td>
               <td th:text="${@templateHelper.formatDateTime(role.createdAt)}">创建时间</td>
               <td>
-                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="role:update" th:data-id="${role.id}">编辑</button>
-                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="role:update" th:data-id="${role.id}" th:data-status="${role.status}" th:text="${role.status == 1} ? '禁用' : '启用'">禁用</button>
-                <button class="btn btn-sm btn-outline-info me-1 btn-perms" data-perm="role:assign-perm" th:data-id="${role.id}">分配权限</button>
-                <button class="btn btn-sm btn-danger btn-delete" data-perm="role:delete" th:data-id="${role.id}">删除</button>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" sec:authorize="hasAuthority('role:update')" th:data-id="${role.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" sec:authorize="hasAuthority('role:update')" th:data-id="${role.id}" th:data-status="${role.status}" th:text="${role.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-outline-info me-1 btn-perms" sec:authorize="hasAuthority('role:assign-perm')" th:data-id="${role.id}">分配权限</button>
+                <button class="btn btn-sm btn-danger btn-delete" sec:authorize="hasAuthority('role:delete')" th:data-id="${role.id}">删除</button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-  </div>
+    </div>
 
     <!-- Role Modal -->
     <div class="modal fade" id="role-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="role-modal-title">新增角色</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="role-form">
-            <input type="hidden" id="role-id">
-            <div class="mb-3">
-              <label class="form-label">角色编码</label>
-              <input type="text" class="form-control" id="role-code" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">角色名称</label>
-              <input type="text" class="form-control" id="role-name" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">状态</label>
-              <div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="role-status" id="role-status-enable" value="1" checked>
-                  <label class="form-check-label" for="role-status-enable">启用</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="role-status" id="role-status-disable" value="0">
-                  <label class="form-check-label" for="role-status-disable">禁用</label>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="role-modal-title">新增角色</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="role-form">
+              <input type="hidden" id="role-id">
+              <div class="mb-3">
+                <label class="form-label">角色编码</label>
+                <input type="text" class="form-control" id="role-code" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">角色名称</label>
+                <input type="text" class="form-control" id="role-name" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">状态</label>
+                <div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="role-status" id="role-status-enable" value="1" checked>
+                    <label class="form-check-label" for="role-status-enable">启用</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="role-status" id="role-status-disable" value="0">
+                    <label class="form-check-label" for="role-status-disable">禁用</label>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="btn-save">保存</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Permission Assign Modal -->
-  <div class="modal fade" id="perm-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">分配权限</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div id="perm-tree"></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="btn-save-perms">保存</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-save">保存</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
-  <script th:inline="javascript">
-    let roleTable;
-    let currentRoleId = null;
-    let permissionTree = [];
-    const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
-    const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
+    <!-- Permission Assign Modal -->
+    <div class="modal fade" id="perm-modal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">分配权限</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="perm-tree"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-save-perms">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function loadPermissions() {
-      if (permissionTree && permissionTree.length > 0) {
-        return $.Deferred().resolve({ data: permissionTree }).promise();
-      }
-      return ajaxRequest({ path: '/permissions', type: 'GET' }).done(function (res) {
-        permissionTree = res.data || [];
-      });
-    }
+    <th:block layout:fragment="page-scripts">
+      <script th:src="@{/webjars/datatables/js/jquery.dataTables.min.js}"></script>
+      <script th:src="@{/webjars/datatables/js/dataTables.bootstrap5.min.js}"></script>
+      <script th:src="@{/webjars/jstree/jstree.min.js}"></script>
+      <script th:inline="javascript">
+        let roleTable;
+        let currentRoleId = null;
+        let permissionTree = [];
+        const roleModal = new bootstrap.Modal(document.getElementById('role-modal'));
+        const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
 
-    function buildJsTreeData(nodes) {
-      return nodes.map(function (node) {
-        return {
-          id: node.id,
-          text: node.permName,
-          state: { opened: true },
-          children: node.children && node.children.length > 0 ? buildJsTreeData(node.children) : []
-        };
-      });
-    }
-
-    function renderTable() {
-      roleTable = $('#role-table').DataTable({
-        processing: true,
-        serverSide: true,
-        deferLoading: [[${initialData.total}]],
-        searching: false,
-        ordering: false,
-        pageLength: 10,
-        lengthMenu: [10, 20, 50],
-        language: {
-          url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
-        },
-        ajax: function (data, callback) {
-          const params = {
-            pageNum: (data.start / data.length) + 1,
-            pageSize: data.length,
-            roleName: $('#query-role-name').val(),
-            status: $('#query-status').val()
-          };
-          ajaxRequest({ path: '/roles', type: 'GET', data: params }).done(function (res) {
-            callback({
-              draw: data.draw,
-              recordsTotal: res.data.total,
-              recordsFiltered: res.data.total,
-              data: res.data.list
-            });
-          }).fail(function () {
-            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
-          });
-        },
-        columns: [
-          { data: 'id', visible: false },
-          { data: 'roleCode', render: function (data) { return escapeHtml(data); } },
-          { data: 'roleName', render: function (data) { return escapeHtml(data); } },
-          {
-            data: 'status',
-            render: function (data) {
-              return data == 1
-                ? '<span class="badge text-bg-success">启用</span>'
-                : '<span class="badge text-bg-danger">禁用</span>';
-            }
-          },
-          {
-            data: 'createdAt',
-            render: function (data) { return formatDateTime(data); }
-          },
-          {
-            data: null,
-            render: function (data) {
-              let html = '';
-              html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="role:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="role:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
-              html += '<button class="btn btn-sm btn-outline-info me-1 btn-perms" data-perm="role:assign-perm" data-id="' + data.id + '">分配权限</button>';
-              html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="role:delete" data-id="' + data.id + '">删除</button>';
-              return html;
-            }
+        function loadPermissions() {
+          if (permissionTree && permissionTree.length > 0) {
+            return $.Deferred().resolve({ data: permissionTree }).promise();
           }
-        ],
-        drawCallback: function () {
-          applyPermission();
+          return ajaxRequest({ path: '/permissions', type: 'GET' }).done(function (res) {
+            permissionTree = res.data || [];
+          });
         }
-      });
-    }
 
-    function openCreate() {
-      $('#role-modal-title').text('新增角色');
-      $('#role-id').val('');
-      $('#role-code').val('').prop('disabled', false);
-      $('#role-name').val('');
-      $('#role-status-enable').prop('checked', true);
-      roleModal.show();
-    }
+        function buildJsTreeData(nodes) {
+          return nodes.map(function (node) {
+            return {
+              id: node.id,
+              text: node.permName,
+              state: { opened: true },
+              children: node.children && node.children.length > 0 ? buildJsTreeData(node.children) : []
+            };
+          });
+        }
 
-    function openEdit(id) {
-      ajaxRequest({ path: '/roles/' + id, type: 'GET' }).done(function (res) {
-        const role = res.data;
-        $('#role-modal-title').text('编辑角色');
-        $('#role-id').val(role.id);
-        $('#role-code').val(role.roleCode).prop('disabled', true);
-        $('#role-name').val(role.roleName);
-        if (role.status === 1) {
+        function renderTable() {
+          roleTable = $('#role-table').DataTable({
+            processing: true,
+            serverSide: true,
+            deferLoading: [[${initialData.total}]],
+            searching: false,
+            ordering: false,
+            pageLength: 10,
+            lengthMenu: [10, 20, 50],
+            language: {
+              url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/zh.json'
+            },
+            ajax: function (data, callback) {
+              const params = {
+                pageNum: (data.start / data.length) + 1,
+                pageSize: data.length,
+                roleName: $('#query-role-name').val(),
+                status: $('#query-status').val()
+              };
+              ajaxRequest({ path: '/roles', type: 'GET', data: params }).done(function (res) {
+                callback({
+                  draw: data.draw,
+                  recordsTotal: res.data.total,
+                  recordsFiltered: res.data.total,
+                  data: res.data.list
+                });
+              }).fail(function () {
+                callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+              });
+            },
+            columns: [
+              { data: 'id', visible: false },
+              { data: 'roleCode', render: function (data) { return escapeHtml(data); } },
+              { data: 'roleName', render: function (data) { return escapeHtml(data); } },
+              {
+                data: 'status',
+                render: function (data) {
+                  return data == 1
+                    ? '<span class="badge text-bg-success">启用</span>'
+                    : '<span class="badge text-bg-danger">禁用</span>';
+                }
+              },
+              {
+                data: 'createdAt',
+                render: function (data) { return formatDateTime(data); }
+              },
+              {
+                data: null,
+                render: function (data) {
+                  let html = '';
+                  if (hasPermission('role:update')) {
+                    html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-id="' + data.id + '">编辑</button>';
+                    html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
+                  }
+                  if (hasPermission('role:assign-perm')) {
+                    html += '<button class="btn btn-sm btn-outline-info me-1 btn-perms" data-id="' + data.id + '">分配权限</button>';
+                  }
+                  if (hasPermission('role:delete')) {
+                    html += '<button class="btn btn-sm btn-danger btn-delete" data-id="' + data.id + '">删除</button>';
+                  }
+                  return html;
+                }
+              }
+            ]
+          });
+        }
+
+        function openCreate() {
+          $('#role-modal-title').text('新增角色');
+          $('#role-id').val('');
+          $('#role-code').val('').prop('disabled', false);
+          $('#role-name').val('');
           $('#role-status-enable').prop('checked', true);
-        } else {
-          $('#role-status-disable').prop('checked', true);
+          roleModal.show();
         }
-        roleModal.show();
-      });
-    }
 
-    function saveRole() {
-      const id = $('#role-id').val();
-      const roleCode = $('#role-code').val().trim();
-      const roleName = $('#role-name').val().trim();
-      const status = parseInt($('input[name="role-status"]:checked').val(), 10);
-      const btn = $('#btn-save');
+        function openEdit(id) {
+          ajaxRequest({ path: '/roles/' + id, type: 'GET' }).done(function (res) {
+            const role = res.data;
+            $('#role-modal-title').text('编辑角色');
+            $('#role-id').val(role.id);
+            $('#role-code').val(role.roleCode).prop('disabled', true);
+            $('#role-name').val(role.roleName);
+            if (role.status === 1) {
+              $('#role-status-enable').prop('checked', true);
+            } else {
+              $('#role-status-disable').prop('checked', true);
+            }
+            roleModal.show();
+          });
+        }
 
-      if (!roleCode || !roleName) {
-        showToast('请输入角色编码和名称', 'error');
-        return;
-      }
+        function saveRole() {
+          const id = $('#role-id').val();
+          const roleCode = $('#role-code').val().trim();
+          const roleName = $('#role-name').val().trim();
+          const status = parseInt($('input[name="role-status"]:checked').val(), 10);
+          const btn = $('#btn-save');
 
-      setButtonLoading(btn, true);
-      const data = { roleCode: roleCode, roleName: roleName, status: status };
-      let req;
-      if (id) {
-        req = ajaxRequest({ path: '/roles/' + id, type: 'PUT', data: data });
-      } else {
-        req = ajaxRequest({ path: '/roles', type: 'POST', data: data });
-      }
-      req.done(function () {
-        showToast('保存成功', 'success');
-        roleModal.hide();
-        roleTable.ajax.reload();
-      }).always(function () {
-        setButtonLoading(btn, false);
-      });
-    }
+          if (!roleCode || !roleName) {
+            showToast('请输入角色编码和名称', 'error');
+            return;
+          }
 
-    function toggleStatus(id, currentStatus) {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      ajaxRequest({ path: '/roles/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
-        showToast('状态更新成功', 'success');
-        roleTable.ajax.reload();
-      });
-    }
+          setButtonLoading(btn, true);
+          const data = { roleCode: roleCode, roleName: roleName, status: status };
+          let req;
+          if (id) {
+            req = ajaxRequest({ path: '/roles/' + id, type: 'PUT', data: data });
+          } else {
+            req = ajaxRequest({ path: '/roles', type: 'POST', data: data });
+          }
+          req.done(function () {
+            showToast('保存成功', 'success');
+            roleModal.hide();
+            roleTable.ajax.reload();
+          }).always(function () {
+            setButtonLoading(btn, false);
+          });
+        }
 
-    function deleteRole(id) {
-      confirmDialog('确认删除该角色吗？', function () {
-        ajaxRequest({ path: '/roles/' + id, type: 'DELETE' }).done(function () {
-          showToast('删除成功', 'success');
-          roleTable.ajax.reload();
-        });
-      });
-    }
+        function toggleStatus(id, currentStatus) {
+          const newStatus = currentStatus === 1 ? 0 : 1;
+          ajaxRequest({ path: '/roles/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
+            showToast('状态更新成功', 'success');
+            roleTable.ajax.reload();
+          });
+        }
 
-    function openAssignPerms(id) {
-      currentRoleId = id;
-      $.when(
-        ajaxRequest({ path: '/roles/' + id, type: 'GET' }),
-        loadPermissions()
-      ).done(function (roleRes, permRes) {
-        const role = roleRes[0].data;
-        const selected = role.permissionIds || [];
-        const treeData = buildJsTreeData(permissionTree);
-        const treeEl = $('#perm-tree');
-        treeEl.jstree('destroy');
-        treeEl.jstree({
-          core: {
-            data: treeData,
-            themes: { responsive: true }
-          },
-          plugins: ['checkbox']
-        });
-        treeEl.off('ready.jstree').on('ready.jstree', function () {
-          treeEl.jstree(true).check_node(selected);
-        });
-        permModal.show();
-      });
-    }
+        function deleteRole(id) {
+          confirmDialog('确认删除该角色吗？', function () {
+            ajaxRequest({ path: '/roles/' + id, type: 'DELETE' }).done(function () {
+              showToast('删除成功', 'success');
+              roleTable.ajax.reload();
+            });
+          });
+        }
 
-    function saveAssignPerms() {
-      const tree = $('#perm-tree').jstree(true);
-      const checked = tree.get_checked(true);
-      const ids = checked.map(function (node) { return parseInt(node.id, 10); });
-      const permissionIds = ids;
-      const btn = $('#btn-save-perms');
-      setButtonLoading(btn, true);
-      ajaxRequest({ path: '/roles/' + currentRoleId + '/permissions', type: 'POST', data: { permissionIds: permissionIds } }).done(function () {
-        showToast('分配成功', 'success');
-        permModal.hide();
-        roleTable.ajax.reload();
-      }).always(function () {
-        setButtonLoading(btn, false);
-      });
-    }
+        function openAssignPerms(id) {
+          currentRoleId = id;
+          $.when(
+            ajaxRequest({ path: '/roles/' + id, type: 'GET' }),
+            loadPermissions()
+          ).done(function (roleRes, permRes) {
+            const role = roleRes[0].data;
+            const selected = role.permissionIds || [];
+            const treeData = buildJsTreeData(permissionTree);
+            const treeEl = $('#perm-tree');
+            treeEl.jstree('destroy');
+            treeEl.jstree({
+              core: {
+                data: treeData,
+                themes: { responsive: true }
+              },
+              plugins: ['checkbox']
+            });
+            treeEl.off('ready.jstree').on('ready.jstree', function () {
+              treeEl.jstree(true).check_node(selected);
+            });
+            permModal.show();
+          });
+        }
 
-    $(function () {
-      renderTable();
+        function saveAssignPerms() {
+          const tree = $('#perm-tree').jstree(true);
+          const checked = tree.get_checked(true);
+          const ids = checked.map(function (node) { return parseInt(node.id, 10); });
+          const permissionIds = ids;
+          const btn = $('#btn-save-perms');
+          setButtonLoading(btn, true);
+          ajaxRequest({ path: '/roles/' + currentRoleId + '/permissions', type: 'POST', data: { permissionIds: permissionIds } }).done(function () {
+            showToast('分配成功', 'success');
+            permModal.hide();
+            roleTable.ajax.reload();
+          }).always(function () {
+            setButtonLoading(btn, false);
+          });
+        }
 
-      $('#query-form').on('submit', function (e) {
-        e.preventDefault();
-        roleTable.ajax.reload();
-      });
-      $('#btn-reset').on('click', function () {
-        $('#query-role-name').val('');
-        $('#query-status').val('');
-        roleTable.ajax.reload();
-      });
-      $('#btn-create').on('click', openCreate);
-      $('#btn-save').on('click', saveRole);
-      $('#btn-save-perms').on('click', saveAssignPerms);
+        function initPage() {
+          renderTable();
 
-      $('#role-table').on('click', '.btn-edit', function () {
-        openEdit($(this).data('id'));
-      });
-      $('#role-table').on('click', '.btn-toggle', function () {
-        toggleStatus($(this).data('id'), $(this).data('status'));
-      });
-      $('#role-table').on('click', '.btn-perms', function () {
-        openAssignPerms($(this).data('id'));
-      });
-      $('#role-table').on('click', '.btn-delete', function () {
-        deleteRole($(this).data('id'));
-      });
-    });
-  </script>
+          $('#query-form').on('submit', function (e) {
+            e.preventDefault();
+            roleTable.ajax.reload();
+          });
+          $('#btn-reset').on('click', function () {
+            $('#query-role-name').val('');
+            $('#query-status').val('');
+            roleTable.ajax.reload();
+          });
+          $('#btn-create').on('click', openCreate);
+          $('#btn-save').on('click', saveRole);
+          $('#btn-save-perms').on('click', saveAssignPerms);
+
+          $('#role-table').on('click', '.btn-edit', function () {
+            openEdit($(this).data('id'));
+          });
+          $('#role-table').on('click', '.btn-toggle', function () {
+            toggleStatus($(this).data('id'), $(this).data('status'));
+          });
+          $('#role-table').on('click', '.btn-perms', function () {
+            openAssignPerms($(this).data('id'));
+          });
+          $('#role-table').on('click', '.btn-delete', function () {
+            deleteRole($(this).data('id'));
+          });
+        }
+      </script>
+    </th:block>
+  </div>
 </body>
 </html>

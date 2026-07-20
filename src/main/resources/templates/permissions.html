@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head(~{::title}, ~{::link})">
-  <title>权限管理 - Molly Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <link href="/css/style.css" rel="stylesheet">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+  <title>权限管理</title>
+  <th:block layout:fragment="page-styles">
+    <link rel="stylesheet" th:href="@{/webjars/datatables/css/dataTables.bootstrap5.min.css}">
+  </th:block>
 </head>
-<body th:replace="layout :: body(~{::.content}, ~{::script})">
-  <div class="content">
+<body>
+  <div layout:fragment="content">
     <div class="card mb-4">
       <div class="card-body d-flex justify-content-between align-items-center">
         <span class="fw-medium text-secondary">权限树</span>
-        <button class="btn btn-success" id="btn-create" data-perm="permission:create">新增</button>
+        <button class="btn btn-success" id="btn-create" sec:authorize="hasAuthority('permission:create')">新增</button>
       </div>
     </div>
 
@@ -45,282 +49,285 @@
               <td th:text="${node.sort}">排序</td>
               <td th:text="${node.status}">1</td>
               <td>
-                <button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="permission:update" th:data-id="${node.id}">编辑</button>
-                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="permission:update" th:data-id="${node.id}" th:data-status="${node.status}" th:text="${node.status == 1} ? '禁用' : '启用'">禁用</button>
-                <button class="btn btn-sm btn-danger btn-delete" data-perm="permission:delete" th:data-id="${node.id}">删除</button>
+                <button class="btn btn-sm btn-primary me-1 btn-edit" sec:authorize="hasAuthority('permission:update')" th:data-id="${node.id}">编辑</button>
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" sec:authorize="hasAuthority('permission:update')" th:data-id="${node.id}" th:data-status="${node.status}" th:text="${node.status == 1} ? '禁用' : '启用'">禁用</button>
+                <button class="btn btn-sm btn-danger btn-delete" sec:authorize="hasAuthority('permission:delete')" th:data-id="${node.id}">删除</button>
               </td>
             </tr>
             <th:block th:if="${!#lists.isEmpty(node.children)}" th:replace="~{::permRows(${node.children}, ${level + 1})}"></th:block>
           </th:block>
         </th:block>
       </div>
-  </div>
+    </div>
 
     <!-- Permission Modal -->
     <div class="modal fade" id="perm-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="perm-modal-title">新增权限</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="perm-form">
-            <input type="hidden" id="perm-id">
-            <div class="mb-3">
-              <label class="form-label">权限编码</label>
-              <input type="text" class="form-control" id="perm-code" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">权限名称</label>
-              <input type="text" class="form-control" id="perm-name" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">权限类型</label>
-              <select class="form-select" id="perm-type" required>
-                <option value="1">目录</option>
-                <option value="2">菜单</option>
-                <option value="3">按钮</option>
-                <option value="4">接口</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">父级权限</label>
-              <select class="form-select" id="perm-parent">
-                <option value="0">根节点</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">路径</label>
-              <input type="text" class="form-control" id="perm-path" placeholder="路由或接口地址">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">排序</label>
-              <input type="number" class="form-control" id="perm-sort" value="0" min="0">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">状态</label>
-              <div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="perm-status" id="perm-status-enable" value="1" checked>
-                  <label class="form-check-label" for="perm-status-enable">启用</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="perm-status" id="perm-status-disable" value="0">
-                  <label class="form-check-label" for="perm-status-disable">禁用</label>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="perm-modal-title">新增权限</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="perm-form">
+              <input type="hidden" id="perm-id">
+              <div class="mb-3">
+                <label class="form-label">权限编码</label>
+                <input type="text" class="form-control" id="perm-code" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">权限名称</label>
+                <input type="text" class="form-control" id="perm-name" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">权限类型</label>
+                <select class="form-select" id="perm-type" required>
+                  <option value="1">目录</option>
+                  <option value="2">菜单</option>
+                  <option value="3">按钮</option>
+                  <option value="4">接口</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">父级权限</label>
+                <select class="form-select" id="perm-parent">
+                  <option value="0">根节点</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">路径</label>
+                <input type="text" class="form-control" id="perm-path" placeholder="路由或接口地址">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">排序</label>
+                <input type="number" class="form-control" id="perm-sort" value="0" min="0">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">状态</label>
+                <div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="perm-status" id="perm-status-enable" value="1" checked>
+                    <label class="form-check-label" for="perm-status-enable">启用</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="perm-status" id="perm-status-disable" value="0">
+                    <label class="form-check-label" for="perm-status-disable">禁用</label>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="btn-save">保存</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" id="btn-save">保存</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script>
-    let permTable;
-    let permissionTree = [];
-    const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
+    <th:block layout:fragment="page-scripts">
+      <script th:src="@{/webjars/datatables/js/jquery.dataTables.min.js}"></script>
+      <script th:src="@{/webjars/datatables/js/dataTables.bootstrap5.min.js}"></script>
+      <script th:inline="javascript">
+        let permTable;
+        let permissionTree = [];
+        const permModal = new bootstrap.Modal(document.getElementById('perm-modal'));
 
-    const typeLabels = { 1: '目录', 2: '菜单', 3: '按钮', 4: '接口' };
-    const typeBadges = { 1: 'text-bg-primary', 2: 'text-bg-success', 3: 'text-bg-warning', 4: 'text-bg-secondary' };
+        const typeLabels = { 1: '目录', 2: '菜单', 3: '按钮', 4: '接口' };
+        const typeBadges = { 1: 'text-bg-primary', 2: 'text-bg-success', 3: 'text-bg-warning', 4: 'text-bg-secondary' };
 
-    function flattenPermissions(nodes, level, result) {
-      result = result || [];
-      nodes.forEach(function (node) {
-        node.level = level;
-        result.push(node);
-        if (node.children && node.children.length > 0) {
-          flattenPermissions(node.children, level + 1, result);
-        }
-      });
-      return result;
-    }
-
-    function loadPermissions() {
-      return ajaxRequest({ path: '/permissions', type: 'GET' }).done(function (res) {
-        permissionTree = res.data || [];
-      });
-    }
-
-    function buildParentOptions(nodes, level, currentId) {
-      let html = '';
-      const indent = '&nbsp;&nbsp;'.repeat(level);
-      nodes.forEach(function (node) {
-        if (node.id !== currentId) {
-          html += '<option value="' + node.id + '">' + indent + escapeHtml(node.permName) + '</option>';
-        }
-        if (node.children && node.children.length > 0) {
-          html += buildParentOptions(node.children, level + 1, currentId);
-        }
-      });
-      return html;
-    }
-
-    function renderTable() {
-      permTable = $('#perm-table').DataTable({
-        searching: false,
-        ordering: false,
-        paging: false,
-        info: false,
-        columns: [
-          { data: 'id', visible: false },
-          {
-            data: 'permName',
-            render: function (data, type, row) {
-              const indent = '&nbsp;&nbsp;'.repeat(row.level || 0);
-              return indent + escapeHtml(data);
+        function flattenPermissions(nodes, level, result) {
+          result = result || [];
+          nodes.forEach(function (node) {
+            node.level = level;
+            result.push(node);
+            if (node.children && node.children.length > 0) {
+              flattenPermissions(node.children, level + 1, result);
             }
-          },
-          { data: 'permCode', render: function (data) { return escapeHtml(data); } },
-          {
-            data: 'type',
-            render: function (data) {
-              const type = parseInt(data, 10);
-              return '<span class="badge ' + (typeBadges[type] || 'text-bg-secondary') + '">' + escapeHtml(typeLabels[type] || data) + '</span>';
-            }
-          },
-          { data: 'path', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
-          { data: 'sort' },
-          {
-            data: 'status',
-            render: function (data) {
-              return data == 1
-                ? '<span class="badge text-bg-success">启用</span>'
-                : '<span class="badge text-bg-danger">禁用</span>';
-            }
-          },
-          {
-            data: null,
-            render: function (data) {
-              let html = '';
-              html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-perm="permission:update" data-id="' + data.id + '">编辑</button>';
-              html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-perm="permission:update" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
-              html += '<button class="btn btn-sm btn-danger btn-delete" data-perm="permission:delete" data-id="' + data.id + '">删除</button>';
-              return html;
-            }
-          }
-        ],
-        drawCallback: function () {
-          applyPermission();
+          });
+          return result;
         }
-      });
-    }
 
-    function refreshTable() {
-      loadPermissions().done(function () {
-        permTable.clear().rows.add(flattenPermissions(permissionTree, 0)).draw();
-      });
-    }
+        function loadPermissions() {
+          return ajaxRequest({ path: '/permissions', type: 'GET' }).done(function (res) {
+            permissionTree = res.data || [];
+          });
+        }
 
-    function openCreate() {
-      $('#perm-modal-title').text('新增权限');
-      $('#perm-id').val('');
-      $('#perm-code').val('').prop('disabled', false);
-      $('#perm-name').val('');
-      $('#perm-type').val('2');
-      $('#perm-path').val('');
-      $('#perm-sort').val(0);
-      $('#perm-status-enable').prop('checked', true);
-      $('#perm-parent').html('<option value="0">根节点</option>' + buildParentOptions(permissionTree, 0, null)).val('0');
-      permModal.show();
-    }
+        function buildParentOptions(nodes, level, currentId) {
+          let html = '';
+          const indent = '&nbsp;&nbsp;'.repeat(level);
+          nodes.forEach(function (node) {
+            if (node.id !== currentId) {
+              html += '<option value="' + node.id + '">' + indent + escapeHtml(node.permName) + '</option>';
+            }
+            if (node.children && node.children.length > 0) {
+              html += buildParentOptions(node.children, level + 1, currentId);
+            }
+          });
+          return html;
+        }
 
-    function openEdit(id) {
-      ajaxRequest({ path: '/permissions/' + id, type: 'GET' }).done(function (res) {
-        const perm = res.data;
-        $('#perm-modal-title').text('编辑权限');
-        $('#perm-id').val(perm.id);
-        $('#perm-code').val(perm.permCode).prop('disabled', true);
-        $('#perm-name').val(perm.permName);
-        $('#perm-type').val(perm.type);
-        $('#perm-path').val(perm.path || '');
-        $('#perm-sort').val(perm.sort);
-        if (perm.status === 1) {
+        function renderTable() {
+          permTable = $('#perm-table').DataTable({
+            searching: false,
+            ordering: false,
+            paging: false,
+            info: false,
+            columns: [
+              { data: 'id', visible: false },
+              {
+                data: 'permName',
+                render: function (data, type, row) {
+                  const indent = '&nbsp;&nbsp;'.repeat(row.level || 0);
+                  return indent + escapeHtml(data);
+                }
+              },
+              { data: 'permCode', render: function (data) { return escapeHtml(data); } },
+              {
+                data: 'type',
+                render: function (data) {
+                  const type = parseInt(data, 10);
+                  return '<span class="badge ' + (typeBadges[type] || 'text-bg-secondary') + '">' + escapeHtml(typeLabels[type] || data) + '</span>';
+                }
+              },
+              { data: 'path', defaultContent: '-', render: function (data) { return escapeHtml(data); } },
+              { data: 'sort' },
+              {
+                data: 'status',
+                render: function (data) {
+                  return data == 1
+                    ? '<span class="badge text-bg-success">启用</span>'
+                    : '<span class="badge text-bg-danger">禁用</span>';
+                }
+              },
+              {
+                data: null,
+                render: function (data) {
+                  let html = '';
+                  if (hasPermission('permission:update')) {
+                    html += '<button class="btn btn-sm btn-primary me-1 btn-edit" data-id="' + data.id + '">编辑</button>';
+                    html += '<button class="btn btn-sm btn-outline-secondary me-1 btn-toggle" data-id="' + data.id + '" data-status="' + data.status + '">' + (data.status == 1 ? '禁用' : '启用') + '</button>';
+                  }
+                  if (hasPermission('permission:delete')) {
+                    html += '<button class="btn btn-sm btn-danger btn-delete" data-id="' + data.id + '">删除</button>';
+                  }
+                  return html;
+                }
+              }
+            ]
+          });
+        }
+
+        function refreshTable() {
+          loadPermissions().done(function () {
+            permTable.clear().rows.add(flattenPermissions(permissionTree, 0)).draw();
+          });
+        }
+
+        function openCreate() {
+          $('#perm-modal-title').text('新增权限');
+          $('#perm-id').val('');
+          $('#perm-code').val('').prop('disabled', false);
+          $('#perm-name').val('');
+          $('#perm-type').val('2');
+          $('#perm-path').val('');
+          $('#perm-sort').val(0);
           $('#perm-status-enable').prop('checked', true);
-        } else {
-          $('#perm-status-disable').prop('checked', true);
+          $('#perm-parent').html('<option value="0">根节点</option>' + buildParentOptions(permissionTree, 0, null)).val('0');
+          permModal.show();
         }
-        $('#perm-parent').html('<option value="0">根节点</option>' + buildParentOptions(permissionTree, 0, perm.id)).val(perm.parentId || 0);
-        permModal.show();
-      });
-    }
 
-    function savePerm() {
-      const id = $('#perm-id').val();
-      const permCode = $('#perm-code').val().trim();
-      const permName = $('#perm-name').val().trim();
-      const type = parseInt($('#perm-type').val(), 10);
-      const parentId = parseInt($('#perm-parent').val(), 10);
-      const path = $('#perm-path').val().trim();
-      const sort = parseInt($('#perm-sort').val(), 10) || 0;
-      const status = parseInt($('input[name="perm-status"]:checked').val(), 10);
-      const btn = $('#btn-save');
+        function openEdit(id) {
+          ajaxRequest({ path: '/permissions/' + id, type: 'GET' }).done(function (res) {
+            const perm = res.data;
+            $('#perm-modal-title').text('编辑权限');
+            $('#perm-id').val(perm.id);
+            $('#perm-code').val(perm.permCode).prop('disabled', true);
+            $('#perm-name').val(perm.permName);
+            $('#perm-type').val(perm.type);
+            $('#perm-path').val(perm.path || '');
+            $('#perm-sort').val(perm.sort);
+            if (perm.status === 1) {
+              $('#perm-status-enable').prop('checked', true);
+            } else {
+              $('#perm-status-disable').prop('checked', true);
+            }
+            $('#perm-parent').html('<option value="0">根节点</option>' + buildParentOptions(permissionTree, 0, perm.id)).val(perm.parentId || 0);
+            permModal.show();
+          });
+        }
 
-      if (!permCode || !permName) {
-        showToast('请输入权限编码和名称', 'error');
-        return;
-      }
+        function savePerm() {
+          const id = $('#perm-id').val();
+          const permCode = $('#perm-code').val().trim();
+          const permName = $('#perm-name').val().trim();
+          const type = parseInt($('#perm-type').val(), 10);
+          const parentId = parseInt($('#perm-parent').val(), 10);
+          const path = $('#perm-path').val().trim();
+          const sort = parseInt($('#perm-sort').val(), 10) || 0;
+          const status = parseInt($('input[name="perm-status"]:checked').val(), 10);
+          const btn = $('#btn-save');
 
-      setButtonLoading(btn, true);
-      const data = { permCode: permCode, permName: permName, type: type, parentId: parentId, path: path, sort: sort, status: status };
-      let req;
-      if (id) {
-        req = ajaxRequest({ path: '/permissions/' + id, type: 'PUT', data: data });
-      } else {
-        req = ajaxRequest({ path: '/permissions', type: 'POST', data: data });
-      }
-      req.done(function () {
-        showToast('保存成功', 'success');
-        permModal.hide();
-        refreshTable();
-      }).always(function () {
-        setButtonLoading(btn, false);
-      });
-    }
+          if (!permCode || !permName) {
+            showToast('请输入权限编码和名称', 'error');
+            return;
+          }
 
-    function toggleStatus(id, currentStatus) {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      ajaxRequest({ path: '/permissions/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
-        showToast('状态更新成功', 'success');
-        refreshTable();
-      });
-    }
+          setButtonLoading(btn, true);
+          const data = { permCode: permCode, permName: permName, type: type, parentId: parentId, path: path, sort: sort, status: status };
+          let req;
+          if (id) {
+            req = ajaxRequest({ path: '/permissions/' + id, type: 'PUT', data: data });
+          } else {
+            req = ajaxRequest({ path: '/permissions', type: 'POST', data: data });
+          }
+          req.done(function () {
+            showToast('保存成功', 'success');
+            permModal.hide();
+            refreshTable();
+          }).always(function () {
+            setButtonLoading(btn, false);
+          });
+        }
 
-    function deletePerm(id) {
-      confirmDialog('确认删除该权限吗？', function () {
-        ajaxRequest({ path: '/permissions/' + id, type: 'DELETE' }).done(function () {
-          showToast('删除成功', 'success');
-          refreshTable();
-        });
-      });
-    }
+        function toggleStatus(id, currentStatus) {
+          const newStatus = currentStatus === 1 ? 0 : 1;
+          ajaxRequest({ path: '/permissions/' + id + '/status?status=' + newStatus, type: 'PUT' }).done(function () {
+            showToast('状态更新成功', 'success');
+            refreshTable();
+          });
+        }
 
-    $(function () {
-      loadPermissions().done(function () {
-        renderTable();
-      });
+        function deletePerm(id) {
+          confirmDialog('确认删除该权限吗？', function () {
+            ajaxRequest({ path: '/permissions/' + id, type: 'DELETE' }).done(function () {
+              showToast('删除成功', 'success');
+              refreshTable();
+            });
+          });
+        }
 
-      $('#btn-create').on('click', openCreate);
-      $('#btn-save').on('click', savePerm);
+        function initPage() {
+          loadPermissions().done(function () {
+            renderTable();
+          });
 
-      $('#perm-table').on('click', '.btn-edit', function () {
-        openEdit($(this).data('id'));
-      });
-      $('#perm-table').on('click', '.btn-toggle', function () {
-        toggleStatus($(this).data('id'), $(this).data('status'));
-      });
-      $('#perm-table').on('click', '.btn-delete', function () {
-        deletePerm($(this).data('id'));
-      });
-    });
-  </script>
+          $('#btn-create').on('click', openCreate);
+          $('#btn-save').on('click', savePerm);
+
+          $('#perm-table').on('click', '.btn-edit', function () {
+            openEdit($(this).data('id'));
+          });
+          $('#perm-table').on('click', '.btn-toggle', function () {
+            toggleStatus($(this).data('id'), $(this).data('status'));
+          });
+          $('#perm-table').on('click', '.btn-delete', function () {
+            deletePerm($(this).data('id'));
+          });
+        }
+      </script>
+    </th:block>
+  </div>
 </body>
 </html>
