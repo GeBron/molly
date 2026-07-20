@@ -1,13 +1,11 @@
 package com.demo.molly.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,13 +43,10 @@ public class SensitiveDataUtil {
     private static void maskNode(JsonNode node, Set<String> fields) {
         if (node.isObject()) {
             ObjectNode objectNode = (ObjectNode) node;
-            Iterator<Map.Entry<String, JsonNode>> iterator = objectNode.fields();
-            while (iterator.hasNext()) {
-                Map.Entry<String, JsonNode> entry = iterator.next();
-                String key = entry.getKey();
-                JsonNode value = entry.getValue();
+            for (String key : objectNode.propertyNames()) {
+                JsonNode value = objectNode.get(key);
                 if (fields.contains(key)) {
-                    entry.setValue(objectNode.textNode(MASK));
+                    objectNode.put(key, MASK);
                 } else {
                     maskNode(value, fields);
                 }

@@ -4,7 +4,7 @@
 
 ```mermaid
 graph LR
-    A["浏览器"] -->|HTTP / HTTPS| B["molly 后端 Spring Boot 2.7"]
+    A["浏览器"] -->|HTTP / HTTPS| B["molly 后端 Spring Boot 4.1"]
     B --> C["Spring Security"]
     C --> D["Controller"]
     D --> E["Service"]
@@ -20,7 +20,7 @@ graph LR
 ## 2. 技术说明
 
 - **前端**：jQuery + Bootstrap 5 + DataTables + jsTree + flatpickr（CDN），Thymeleaf 模板位于 `src/main/resources/templates/`，由 Spring Boot 直接渲染并托管静态资源
-- **后端**：Spring Boot 2.7.18 + Spring Security + MyBatis + H2（MySQL 兼容模式）
+- **后端**：Spring Boot 4.1.0 + Spring Security 6.x + MyBatis + Flyway + H2（MySQL 兼容模式）
 - **认证**：Spring Security Session/Cookie 登录，Session 有效期 30 分钟
 - **缓存**：Spring Cache + Caffeine 本地缓存，缓存用户角色与权限
 - **权限模型**：RBAC，用户 -> 角色 -> 权限

@@ -9,8 +9,8 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 | 项目名 | molly |
 | 包名 | `com.demo.molly` |
 | 构建工具 | Maven |
-| Spring Boot | 2.7.18 |
-| Java | 1.8 |
+| Spring Boot | 4.1.0 |
+| Java | 17 |
 | 数据库 | H2（MySQL 兼容模式） |
 | 缓存 | Caffeine（本地缓存） |
 | 模板引擎 | Thymeleaf |
@@ -20,16 +20,17 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 
 ### 后端
 
-- Java 1.8
-- Spring Boot 2.7.18
+- Java 17
+- Spring Boot 4.1.0
 - Spring Web
-- Spring Security（Session/Cookie 登录）
+- Spring Security 6.x（Session/Cookie 登录）
 - Spring Validation
 - Spring AOP
 - Spring Cache + Caffeine
 - Thymeleaf
-- MyBatis Spring Boot Starter 2.3.2
-- PageHelper 1.4.7（MyBatis 分页插件）
+- MyBatis Spring Boot Starter 4.1.0
+- PageHelper 4.1.1（MyBatis 分页插件）
+- Flyway
 - H2 Database（MySQL 兼容模式）
 
 ### 前端
@@ -45,8 +46,14 @@ Molly 后台管理系统（非前后端分离版本），基于 Spring Boot + Th
 
 ## 环境要求
 
-- JDK 1.8 及以上
+- JDK 17 及以上
 - Maven 3.6 及以上
+
+> 当前项目使用 `pom.xml` 中 `<java.version>17</java.version>` 指定编译目标版本。若本地默认 `JAVA_HOME` 仍为 JDK 1.8，请在执行 Maven 命令前设置 `JAVA_HOME` 指向 JDK 17，例如：
+> ```bash
+> export JAVA_HOME=/Users/gaoeb/dev/jdk-17.0.19+10/Contents/Home
+> export PATH=$JAVA_HOME/bin:$PATH
+> ```
 
 ## 快速开始
 
