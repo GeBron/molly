@@ -8,9 +8,9 @@ import com.demo.molly.dto.KeywordStatusQuery;
 import com.demo.molly.dto.RoleDTO;
 import com.demo.molly.service.RoleService;
 import com.demo.molly.vo.RoleVO;
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

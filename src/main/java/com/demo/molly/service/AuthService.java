@@ -17,7 +17,8 @@ import com.demo.molly.util.SecurityUtil;
 import com.demo.molly.vo.MenuVO;
 import com.demo.molly.vo.UserInfoVO;
 import com.demo.molly.vo.UserVO;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -55,6 +59,8 @@ public class AuthService {
     private final PermissionMapper permissionMapper;
     private final LoginLogMapper loginLogMapper;
     private final TokenCacheService tokenCacheService;
+    private final SecurityContextRepository securityContextRepository;
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 
     @Autowired
     public AuthService(AuthenticationManager authenticationManager,
@@ -63,7 +69,8 @@ public class AuthService {
                        RoleMapper roleMapper,
                        PermissionMapper permissionMapper,
                        LoginLogMapper loginLogMapper,
-                       TokenCacheService tokenCacheService) {
+                       TokenCacheService tokenCacheService,
+                       SecurityContextRepository securityContextRepository) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.userMapper = userMapper;
@@ -71,9 +78,10 @@ public class AuthService {
         this.permissionMapper = permissionMapper;
         this.loginLogMapper = loginLogMapper;
         this.tokenCacheService = tokenCacheService;
+        this.securityContextRepository = securityContextRepository;
     }
 
-    public UserInfoVO login(LoginDTO dto, HttpServletRequest request) {
+    public UserInfoVO login(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
         User user = userMapper.findByUsername(dto.getUsername());
         if (user == null) {
             saveLoginLog(null, dto.getUsername(), "LOGIN", "FAIL", "用户不存在", request);
@@ -91,7 +99,14 @@ public class AuthService {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            var securityContext = securityContextHolderStrategy.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            securityContextHolderStrategy.setContext(securityContext);
+            var session = request.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+            logger.info("Saved security context to session {}, authenticated={}, principal={}", session.getId(),
+                    securityContext.getAuthentication().isAuthenticated(),
+                    securityContext.getAuthentication().getPrincipal().getClass().getName());
         } catch (BadCredentialsException e) {
             handleLoginFail(user, request);
             throw new BusinessException(401, "用户名或密码错误");

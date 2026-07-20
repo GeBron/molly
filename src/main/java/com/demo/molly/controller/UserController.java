@@ -9,9 +9,9 @@ import com.demo.molly.dto.UpdateUserDTO;
 import com.demo.molly.dto.UserDTO;
 import com.demo.molly.service.UserService;
 import com.demo.molly.vo.UserVO;
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

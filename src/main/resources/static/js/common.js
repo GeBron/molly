@@ -126,6 +126,14 @@ function formatDateTime(isoString) {
 }
 
 function getCsrfToken() {
+  const meta = document.querySelector('meta[name="_csrf"]');
+  if (meta && meta.content) {
+    return meta.content;
+  }
+  const input = document.querySelector('input[name="_csrf"]');
+  if (input && input.value) {
+    return input.value;
+  }
   const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
   return match ? decodeURIComponent(match[2]) : null;
 }

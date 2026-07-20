@@ -4,8 +4,9 @@ import com.demo.molly.common.Result;
 import com.demo.molly.dto.LoginDTO;
 import com.demo.molly.service.AuthService;
 import com.demo.molly.vo.UserInfoVO;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +29,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Result<UserInfoVO> login(@RequestBody @Valid LoginDTO dto, HttpServletRequest request) {
-        return Result.success(authService.login(dto, request));
+    public Result<UserInfoVO> login(@RequestBody @Valid LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
+        return Result.success(authService.login(dto, request, response));
     }
 
     @GetMapping("/info")
